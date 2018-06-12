@@ -1,0 +1,18 @@
+Package: fastbaps
+Title: Fast BAPS
+Version: 0.0.0.9000
+Authors@R: person("Gerry", "Tonkin-Hill", email = "gt20@cam.ac.uk", role = c("aut", "cre"))
+Description: What the package does (one paragraph).
+Depends: R (>= 3.4.1)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    Rcpp,
+    RcppArmadillo,
+    Matrix,
+    phangorn,
+    ape,
+    phytools
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 6.0.1
