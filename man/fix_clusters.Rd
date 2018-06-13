@@ -9,7 +9,7 @@ fix_clusters(sparse.data, clusters, n.iterations = 1)
 \arguments{
 \item{sparse.data}{a sparse SNP data object returned from import_fasta_sparse_nt}
 
-\item{clusters}{the initial clustering to be improved. Given as a vector of cluster memberships of length equal to the number of sequences}
+\item{clusters}{the initial clustering to be improved. Given as a vector of cluster memberships (1 to n.cluster) of length equal to the number of sequences}
 
 \item{n.iterations}{the number of greedy maximisation iterations to perform}
 }

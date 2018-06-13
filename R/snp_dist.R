@@ -16,6 +16,12 @@
 #' @export
 snp_dist <- function(sparse.data){
 
+  # Check inputs
+  if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+
   n.isolates <- ncol(sparse.data$snp.matrix)
 
   shared.snps <- as.matrix(tcrossprod(t(sparse.data$snp.matrix==1)))

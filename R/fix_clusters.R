@@ -5,7 +5,7 @@
 #' @import Matrix
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
-#' @param clusters the initial clustering to be improved. Given as a vector of cluster memberships of length equal to the number of sequences
+#' @param clusters the initial clustering to be improved. Given as a vector of cluster memberships (1 to n.cluster) of length equal to the number of sequences
 #' @param n.iterations the number of greedy maximisation iterations to perform
 #'
 #' @return a final clustering
@@ -22,6 +22,15 @@
 #'
 #' @export
 fix_clusters <- function(sparse.data, clusters, n.iterations=1){
+
+  # Check inputs
+  if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.numeric(clusters)) stop("Invalid value for clusters! Should be a numeric vector with length equal to number of sequences!")
+  if(ncol(sparse.data$snp.matrix)!=length(clusters)) stop("Invalid value for clusters! Should be a numeric vector with length equal to number of sequences!")
+  if(!all(c(1:length(unique(clusters))) %in% clusters)) stop("Clusters should be a numeric vector consisting of the integers 1 to n.clusters!")
 
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)

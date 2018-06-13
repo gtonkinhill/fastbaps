@@ -19,6 +19,17 @@
 #' @export
 fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){
 
+  # Check inputs
+  if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.numeric(n.cores) || n.cores<1) stop("Invalid value for n.cores!")
+  if(!is.null(k.init)){
+    if(!is.numeric(k.init) | k.init < 0) stop("Invalid value for k.init!")
+  }
+
+
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
 
