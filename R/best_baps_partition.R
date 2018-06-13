@@ -2,8 +2,10 @@
 #'
 #' Function to combine smaller clusters from a fast hierarchical algorithm to maximise the BAPS likelihood.
 #'
-#' @param sparse.data
-#' @param phylo
+#' @import Matrix
+#'
+#' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
+#' @param phylo a phylo object representing the hierarchical clustering that is to be cut
 #'
 #' @return a final clustering
 #'
@@ -11,7 +13,7 @@
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
-#' sim.matrix <- snp_similarity(t(sparse.data$snp.matrix>0))
+#' sim.matrix <- snp_similarity(sparse.data)
 #' x <- as.dist(1-sim.matrix/max(sim.matrix))
 #' phylo <- ape::as.phylo(hclust(x, method="average"))
 #' partition <- best_baps_partition(sparse.data, phylo)

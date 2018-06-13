@@ -16,7 +16,7 @@ A pairwise snp distance matrix
 Function to calculate pairwise snp distance matrix
 }
 \examples{
-fasta.file <- system.file("extdata", "seqs.fa", package = "fastbaps")
+fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 snp_dist(sparse.data)
 

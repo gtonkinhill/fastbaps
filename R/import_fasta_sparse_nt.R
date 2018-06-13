@@ -4,6 +4,7 @@
 #'
 #' @useDynLib fastbaps, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
+#' @import Matrix
 #'
 #' @param fasta.file.name path to the fasta file
 #'
@@ -19,7 +20,7 @@ import_fasta_sparse_nt <- function(fasta.file.name){
   snp.data <- fastbaps:::import_fasta_to_vector_each_nt(fasta.file.name)
   snp.data$seq.names <-  gsub("^>","",snp.data$seq.names)
 
-  snp.matrix <- Matrix::sparseMatrix(i=snp.data$i,
+  snp.matrix <- sparseMatrix(i=snp.data$i,
                              j=snp.data$j,
                              x=snp.data$x,
                              dims = c(snp.data$num.seqs, snp.data$seq.length),
@@ -31,7 +32,7 @@ import_fasta_sparse_nt <- function(fasta.file.name){
 
 
   #remove conserved columns
-  conserved <- Matrix::colSums(snp.matrix>0) == 0
+  conserved <- colSums(snp.matrix>0) == 0
   snp.matrix <- snp.matrix[,!conserved]
   snp.data$consensus <- snp.data$consensus[!conserved]
 

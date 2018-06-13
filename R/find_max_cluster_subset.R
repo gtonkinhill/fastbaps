@@ -2,6 +2,8 @@
 #'
 #' Function to find the best partition given a weighting on the nodes
 #'
+#' @import Matrix
+#'
 #' @param phylo
 #' @param node.weights
 #'

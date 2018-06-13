@@ -2,9 +2,11 @@
 #'
 #' Function to iteratively update an intially clustering, greedily maximising the BAPS marginal likelihood.
 #'
-#' @param sparse.data
-#' @param clusters
-#' @param n.iterations
+#' @import Matrix
+#'
+#' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
+#' @param clusters the initial clustering to be improved. Given as a vector of cluster memberships of length equal to the number of sequences
+#' @param n.iterations the number of greedy maximisation iterations to perform
 #'
 #' @return a final clustering
 #'
@@ -12,10 +14,10 @@
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
-#' sim.matrix <- snp_similarity(t(sparse.data$snp.matrix>0))
+#' sim.matrix <- snp_similarity(sparse.data)
 #' x <- as.dist(1-sim.matrix/max(sim.matrix))
 #' phylo <- ape::as.phylo(hclust(x, method="average"))
-#' clusters <- best_baps_partition_fllk(sparse.data, phylo)
+#' clusters <- best_baps_partition(sparse.data, phylo)
 #' clusters <- fix_clusters(sparse.data, clusters)
 #'
 #' @export

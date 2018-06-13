@@ -1,8 +1,12 @@
-#' hc_baps
+#' fast_baps
 #'
 #' Function to perform Bayesian hierarchical clustering of population structure.
 #'
-#' @param snp.matrix
+#' @import Matrix
+#'
+#' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
+#' @param k.init the initial number of clusters to start the bayesian hierarchical clustering from. Defaults to (number of sequences)/4
+#' @param n.cores the number of cores to use in clustering (currently not implemented)
 #'
 #' @return a final clustering
 #'
@@ -10,12 +14,10 @@
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
-#' k.init = 100
-#' gp.hc <- new_baps(sparse.data, k.init=k.init)
-#' best.partition <- best_baps_partition_fllk(sparse.data, phylo = ape::as.phylo(gp.hc))
+#' baps.hc <- fast_baps(sparse.data)
 #'
 #' @export
-new_baps <- function(sparse.data, ncores=1, k.init=NULL){
+fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){
 
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
@@ -32,7 +34,7 @@ new_baps <- function(sparse.data, ncores=1, k.init=NULL){
     snp.dist <- as.matrix(tcrossprod(t(sparse.data$snp.matrix>0)))
     snp.dist <- as.dist((max(snp.dist)-snp.dist)/max(snp.dist))
     h <- hclust(snp.dist, method = "ward.D2")
-    phylo <- as.phylo(h)
+    phylo <- ape::as.phylo(h)
     initial.partition <- split(1:n.isolates, cutree(h, k = min(n.isolates, k.init)))
     dk.initial <- unlist(lapply(initial.partition, function(part){
       if(length(part)<=1){
