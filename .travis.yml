@@ -1,0 +1,13 @@
+language: r
+r: bioc-release
+
+cache: packages
+
+warnings_are_errors: false
+
+sudo: required
+
+before_install: sudo apt-get install libgmp3-dev
+
+notifications:
+    slack: pathogens:8NUkMUXlMNecj9NXnwTKbBQU

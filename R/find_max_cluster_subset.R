@@ -4,11 +4,6 @@
 #'
 #' @import Matrix
 #'
-#' @param phylo
-#' @param node.weights
-#'
-#' @return maximal partition
-#'
 find_max_cluster_subset <- function(phylo, node.weights){
   n.isolates <- ape::Ntip(phylo)
 
