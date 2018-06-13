@@ -1,0 +1,77 @@
+---
+bibliography: vignettes/bibliography.bib
+output: 
+  github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "inst/vignette-supp/",
+  echo=TRUE, 
+  warning=FALSE, 
+  message=FALSE,
+  tidy=TRUE
+)
+```
+
+<!-- [![Travis-CI Build Status](https://travis-ci.org/gtonkinhill/fastbaps.svg?branch=master)](https://travis-ci.org/gtonkinhill/fastbaps) -->
+
+
+# fastbaps
+
+## Installation
+`fastbaps` is currently available on github. It can be installed with `devtools`
+```{r, eval = FALSE}
+install.packages("devtools")
+
+devtools::install_github("gtonkinhill/fastbaps")
+```
+
+If you would like to also build the vignette with your installation run:
+
+```{r, eval=FALSE}
+devtools::install_github("gtonkinhill/fastbaps", build_vignettes = TRUE)
+```
+
+## Quick Start
+Run hierBAPS.
+
+```{r, fig.width =8, fig.height=6, fig.align='center'}
+# devtools::install_github("gtonkinhill/fastbaps")
+library(fastbaps)
+library(ape)
+
+fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
+sparse.data <- import_fasta_sparse_nt(fasta.file.name)
+baps.hc <- fast_baps(sparse.data)
+best.partition <- best_baps_partition(sparse.data, as.phylo(baps.hc))
+```
+
+```{r, echo = FALSE}
+intro_rmd <- 'vignettes/introduction.Rmd'
+
+raw_rmd <- readLines(intro_rmd)
+
+# remove yaml 
+yaml_lines <- grep("---", raw_rmd)
+
+# remove appendix (session info)
+appendix <- grep("Appendix", raw_rmd)
+
+compressed_rmd <- raw_rmd[c(-seq(yaml_lines[1], yaml_lines[2], by = 1), 
+                            -seq(appendix, length(raw_rmd)))]
+writeLines(compressed_rmd, "child.Rmd")
+```
+
+```{r, child = 'child.Rmd'}
+```
+
+```{r cleanup, echo=FALSE, include=FALSE}
+if (file.exists("child.Rmd")) {
+  file.remove("child.Rmd")
+}
+```

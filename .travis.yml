@@ -1,6 +1,8 @@
 language: r
 r: bioc-release
 
+r_github_packages: gtonkinhill/rhierbaps
+
 cache: packages
 
 warnings_are_errors: false

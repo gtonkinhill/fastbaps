@@ -1,0 +1,77 @@
+---
+title: "Introduction to fastbaps"
+author: "Gerry Tonkin-Hill"
+date: "`r Sys.Date()`"
+bibliography: bibliography.bib
+output: 
+  html_document:
+    fig_width: 12
+    fig_height: 8
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy=TRUE)
+```
+
+The fast BAPS algorithm is based on applying the hierarchical bayesian clustering (BHC) algorithm of [@Heller2005-kp] to the problem of clustering genetic sequences using the same likelihood as BAPS [@Cheng2013-mp]. The bayesian hierarchical clustering can be initiated with sequences as individual clusters or by running a faster conventional hierarchical clustering initially followed by BHC of the resulting clusters.
+
+The algorithm has been written to take advantage of fast sparse matrix libraries and is able to handle 1000's of sequences and 100,000's of SNPs in under an hour on a laptop using a single core.
+
+Alternatively, we can condition on an initial phylogentic or hierarchical tree and provide the partition of the hierarchy that maximises the BAPS liklihood. This is useful if the user is mainly interested in psrtitioning an already calculated phylogeny. We have also noticed the partioning a hierarchy built using ward.D2 distance gives very reasonable results, very quickly.
+
+***
+
+
+## Libraries
+
+```{r}
+library(fastbaps)
+library(rhierbaps)
+library(ggtree)
+library(phytools)
+
+set.seed(1234)
+```
+
+## Loading data
+
+We first need to load a multiple sequence alignment into sparse format. We can choose between the original BAPS prior or a prior proportional to the mean frequency of each allele in the population.
+
+```{r}
+fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
+sparse.data <- import_fasta_sparse_nt(fasta.file.name)
+```
+
+
+## Running fastbaps
+
+It is a good idea to choose `k.init` to be significantly larger than the number of clusters you expect. By default it is set to the number of sequences / 4.
+
+```{r}
+baps.hc <- fast_baps(sparse.data)
+```
+
+This provides a bayesian hierarchical clustering of the data. To obtain the partition of this hierarchy that maximises the marginal likelihood run
+
+```{r}
+best.partition <- best_baps_partition(sparse.data, as.phylo(baps.hc))
+```
+
+## References
+
+---
+nocite: '@*'
+...
+
+##Appendix
+```{r}
+sessionInfo()
+```

@@ -14,5 +14,8 @@ Imports:
     phangorn,
     ape,
     phytools
+Suggests: knitr,
+    rmarkdown,
+    ggtree
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 6.0.1

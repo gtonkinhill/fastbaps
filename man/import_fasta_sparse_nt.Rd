@@ -4,10 +4,12 @@
 \alias{import_fasta_sparse_nt}
 \title{import_fasta_sparse_nt}
 \usage{
-import_fasta_sparse_nt(fasta.file.name)
+import_fasta_sparse_nt(fasta.file.name, prior = "baps")
 }
 \arguments{
 \item{fasta.file.name}{path to the fasta file}
+
+\item{prior}{the type of prior to use. Can be one of 'baps' and 'mean' (default=baps)}
 }
 \value{
 A sparse matrix reprsentation of the SNPs (different to the consensus sequence)
