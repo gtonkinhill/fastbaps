@@ -38,7 +38,7 @@ devtools::install_github("gtonkinhill/fastbaps", build_vignettes = TRUE)
 ```
 
 ## Quick Start
-Run hierBAPS.
+Run fastbaps
 
 ```{r, fig.width =8, fig.height=6, fig.align='center'}
 # devtools::install_github("gtonkinhill/fastbaps")

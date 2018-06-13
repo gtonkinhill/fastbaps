@@ -24,7 +24,7 @@ devtools::install_github("gtonkinhill/fastbaps", build_vignettes = TRUE)
 Quick Start
 -----------
 
-Run hierBAPS.
+Run fastbaps
 
 ``` r
 # devtools::install_github('gtonkinhill/fastbaps')
@@ -37,11 +37,11 @@ baps.hc <- fast_baps(sparse.data)
 best.partition <- best_baps_partition(sparse.data, as.phylo(baps.hc))
 ```
 
-The fast BAPS algorithm is based on applying the hierarchical bayesian clustering (BHC) algorithm of (Heller and Ghahramani 2005) to the problem of clustering genetic sequences using the same likelihood as BAPS (Cheng et al. 2013). The bayesian hierarchical clustering can be initiated with sequences as individual clusters or by running a faster conventional hierarchical clustering initially followed by BHC of the resulting clusters.
+The fast BAPS algorithm is based on applying the hierarchical Bayesian clustering (BHC) algorithm of (Heller and Ghahramani 2005) to the problem of clustering genetic sequences using the same likelihood as BAPS (Cheng et al. 2013). The Bayesian hierarchical clustering can be initiated with sequences as individual clusters or by running a faster conventional hierarchical clustering initially followed by BHC of the resulting clusters.
 
 The algorithm has been written to take advantage of fast sparse matrix libraries and is able to handle 1000's of sequences and 100,000's of SNPs in under an hour on a laptop using a single core.
 
-Alternatively, we can condition on an initial phylogentic or hierarchical tree and provide the partition of the hierarchy that maximises the BAPS liklihood. This is useful if the user is mainly interested in psrtitioning an already calculated phylogeny. We have also noticed the partioning a hierarchy built using ward.D2 distance gives very reasonable results, very quickly.
+Alternatively, we can condition on an initial phylogentic or hierarchical tree and provide the partition of the hierarchy that maximises the BAPS likelihood. This is useful if the user is mainly interested in partitioning an already calculated phylogeny. We have also noticed that partitioning a hierarchy built using ward.D2 distance gives very reasonable results, very quickly.
 
 ------------------------------------------------------------------------
 
@@ -53,6 +53,7 @@ library(fastbaps)
 library(rhierbaps)
 library(ggtree)
 library(phytools)
+library(ggplot2)
 
 set.seed(1234)
 ```
@@ -73,13 +74,59 @@ Running fastbaps
 It is a good idea to choose `k.init` to be significantly larger than the number of clusters you expect. By default it is set to the number of sequences / 4.
 
 ``` r
-baps.hc <- fast_baps(sparse.data)
+baps.hc <- fast_baps(sparse.data, k.init = 51)
 ```
 
-This provides a bayesian hierarchical clustering of the data. To obtain the partition of this hierarchy that maximises the marginal likelihood run
+This provides a Bayesian hierarchical clustering of the data. To obtain the partition of this hierarchy that maximises the marginal likelihood run
 
 ``` r
 best.partition <- best_baps_partition(sparse.data, as.phylo(baps.hc))
+```
+
+We can compare the log marginal likelihood with that obtained using hierbaps.
+
+``` r
+snp.matrix <- load_fasta(fasta.file.name)
+hb.results <- hierBAPS(snp.matrix, max.depth = 2, n.pops = 20, quiet = TRUE)
+
+calc_marginal_llk(sparse.data, hb.results$partition.df$`level 1`)
+#> [1] -49596.48
+calc_marginal_llk(sparse.data, best.partition)
+#> [1] -49503.41
+```
+
+We can also plot the output of the two algorithms along with a pre-calculated tree using ggtree (Yu et al. 2017).
+
+``` r
+# newick.file.name <- system.file('extdata', 'seqs.fa.treefile', package =
+# 'fastbaps') iqtree <- phytools::read.newick(newick.file.name) plot.df <-
+# data.frame(id=colnames(sparse.data$snp.matrix),
+# val=hb.results$partition.df$`level 1`, fastbaps=best.partition,
+# stringsAsFactors = FALSE) gg <- ggtree(iqtree) gg <- gg %<+% plot.df gg <-
+# gg + geom_tippoint(aes(color = factor(hierBAPS))) f1 <- facet_plot(gg,
+# panel='hierBAPS', data=plot.df, geom=geom_tile, aes(x=val), color='red')
+# f2 <- facet_plot(f1, panel='fastbaps', data=plot.df, geom=geom_tile,
+# aes(x=fastbaps), color='blue') f2
+```
+
+Calculating pairwise SNP similarity and distance matrices
+---------------------------------------------------------
+
+The fastbaps package includes functions for very quickly obtaining pairwise SNP matrices. It achieves this by taking advantage of very fast sparse matrix algebra libraries.
+
+``` r
+snp.similarity.matrix <- snp_similarity(sparse.data)
+snp.distance.matrix <- snp_dist(sparse.data)
+```
+
+By using the distance matrix to very quickly calculate a hierarchy using Ward's method we can get a reasonable result very quickly.
+
+``` r
+d <- as.dist(snp.distance.matrix/max(snp.distance.matrix))
+h <- hclust(d, method = "ward.D2")
+best.partition.ward <- best_baps_partition(sparse.data, as.phylo(h))
+calc_marginal_llk(sparse.data, best.partition.ward)
+#> [1] -49612.98
 ```
 
 References
