@@ -61,5 +61,5 @@ import_fasta_sparse_nt <- function(fasta.file.name, prior='baps'){
 
 
   return(list(snp.matrix=t(snp.matrix), consensus=snp.data$consensus,
-              prior=prior.matrix))
+              prior=prior.matrix, prior.type=prior))
 }

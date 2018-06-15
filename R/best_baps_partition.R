@@ -23,6 +23,17 @@
 #'
 #' @export
 best_baps_partition <- function(sparse.data, phylo){
+
+  # Check inputs
+  if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(class(phylo)!="phylo") stop("Invalid value for phylo! Should be an ape::phylo object!")
+  if(!all(phylo$tip.label %in% colnames(sparse.data$snp.matrix))) stop("phylo tip labels must match sequence names!")
+  if(!all(colnames(sparse.data$snp.matrix) %in% phylo$tip.label)) stop("phylo tip labels must match sequence names!")
+
+
   n.isolates <- ape::Ntip(phylo)
 
   #reorder matrx to match leaves of phylo

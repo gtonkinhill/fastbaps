@@ -24,9 +24,10 @@ List part_llks(List data, List partitions) {
   arma::umat consensus_counts = arma::zeros<arma::umat>(n_snps);
 
   // Pre-compute lgamma values up to three decimal places for each possible count lgamma(x+decimal)
-  arma::dmat pre_lgamma = arma::dmat(n_isolates+2, 1000);
+  int lg_size = ceil(max(prior)*1000)+2;
+  arma::dmat pre_lgamma = arma::dmat(n_isolates+2, lg_size);
   for(i=0; i<(n_isolates+2); i++){
-    for(j=0; j<1000; j++){
+    for(j=0; j<lg_size; j++){
       if((i==0) && (j==0)) continue;
       pre_lgamma(i,j) = lgamma(i+(j*0.001));
     }
@@ -34,10 +35,20 @@ List part_llks(List data, List partitions) {
   arma::umat prior_index = arma::umat(5, n_snps);
   for(i=0; i<5; i++){
     for(j=0; j<n_snps; j++){
-      if (prior(i,j)>=1){
-        Rcpp::stop("At the moment there is only support for priors < 1");
-      }
       prior_index(i,j) = floor(prior(i,j)/0.001);
+    }
+  }
+
+  //Precompute first term in mllk
+  NumericVector term1(n_isolates+2, 0.0);
+  double alpha_sum = 0.0;
+  for (partition_length=1; partition_length<n_isolates+2; partition_length++){
+    for (j=0; j < n_snps; j++){
+      alpha_sum = 0.0;
+      for(i=0; i<5; i++){
+        alpha_sum += prior(i,j);
+      }
+      term1(partition_length) -= lgamma(partition_length+alpha_sum);
     }
   }
 
@@ -58,7 +69,7 @@ List part_llks(List data, List partitions) {
 
     // calculate llk
     consensus_counts.fill(partition_length);
-    llk(p) = -n_snps*pre_lgamma(partition_length+1, 0);
+    llk(p) = term1(partition_length); //-n_snps*pre_lgamma(partition_length+1, 0);
 
     for (arma::sp_umat::const_iterator it = sparse_partition_counts.begin(); it != sparse_partition_counts.end(); ++it) {
       consensus_counts[it.row()] -= *it;

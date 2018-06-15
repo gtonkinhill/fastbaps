@@ -12,7 +12,7 @@ Installation
 ``` r
 install.packages("devtools")
 
-devtools::install_github("gtonkinhill/fastbaps")
+devtools::install_github("gtonkinhill/fastbaps", auth_token = "37064ad364627e23377a492cf790285642256a23")
 ```
 
 If you would like to also build the vignette with your installation run:
@@ -74,7 +74,7 @@ Running fastbaps
 It is a good idea to choose `k.init` to be significantly larger than the number of clusters you expect. By default it is set to the number of sequences / 4.
 
 ``` r
-baps.hc <- fast_baps(sparse.data, k.init = 51)
+baps.hc <- fast_baps(sparse.data)
 ```
 
 This provides a Bayesian hierarchical clustering of the data. To obtain the partition of this hierarchy that maximises the marginal likelihood run
@@ -98,16 +98,49 @@ calc_marginal_llk(sparse.data, best.partition)
 We can also plot the output of the two algorithms along with a pre-calculated tree using ggtree (Yu et al. 2017).
 
 ``` r
-# newick.file.name <- system.file('extdata', 'seqs.fa.treefile', package =
-# 'fastbaps') iqtree <- phytools::read.newick(newick.file.name) plot.df <-
-# data.frame(id=colnames(sparse.data$snp.matrix),
-# val=hb.results$partition.df$`level 1`, fastbaps=best.partition,
-# stringsAsFactors = FALSE) gg <- ggtree(iqtree) gg <- gg %<+% plot.df gg <-
-# gg + geom_tippoint(aes(color = factor(hierBAPS))) f1 <- facet_plot(gg,
-# panel='hierBAPS', data=plot.df, geom=geom_tile, aes(x=val), color='red')
-# f2 <- facet_plot(f1, panel='fastbaps', data=plot.df, geom=geom_tile,
-# aes(x=fastbaps), color='blue') f2
+newick.file.name <- system.file("extdata", "seqs.fa.treefile", package = "fastbaps")
+iqtree <- phytools::read.newick(newick.file.name)
+plot.df <- data.frame(id = colnames(sparse.data$snp.matrix), val = hb.results$partition.df$`level 1`, 
+    fastbaps = best.partition, stringsAsFactors = FALSE)
+
+gg <- ggtree(iqtree)
+gg <- gg %<+% data.frame(id = colnames(sparse.data$snp.matrix), hierBAPS = hb.results$partition.df$`level 1`)
+gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
+
+f1 <- facet_plot(gg, panel = "hierBAPS", data = plot.df, geom = geom_tile, aes(x = val), 
+    color = "red")
+f2 <- facet_plot(f1, panel = "fastbaps", data = plot.df, geom = geom_tile, aes(x = fastbaps), 
+    color = "blue")
+f2
 ```
+
+![](inst/vignette-supp/unnamed-chunk-12-1.png)
+
+Rather than choosing either the BAPS prior or the population means we can perform a grid search between these two priors to optimise our choice using Bayes factors.
+
+``` r
+sparse.data <- optimise_prior(sparse.data)
+#> [1] "Optimised hyperparameter: 0.4"
+baps.hc <- fast_baps(sparse.data)
+best.partition <- best_baps_partition(sparse.data, as.phylo(baps.hc))
+```
+
+``` r
+plot.df <- data.frame(id = colnames(sparse.data$snp.matrix), val = hb.results$partition.df$`level 1`, 
+    fastbaps = best.partition, stringsAsFactors = FALSE)
+
+gg <- ggtree(iqtree)
+gg <- gg %<+% data.frame(id = colnames(sparse.data$snp.matrix), hierBAPS = hb.results$partition.df$`level 1`)
+gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
+
+f1 <- facet_plot(gg, panel = "hierBAPS", data = plot.df, geom = geom_tile, aes(x = val), 
+    color = "red")
+f2 <- facet_plot(f1, panel = "fastbaps", data = plot.df, geom = geom_tile, aes(x = fastbaps), 
+    color = "blue")
+f2
+```
+
+![](inst/vignette-supp/unnamed-chunk-14-1.png)
 
 Calculating pairwise SNP similarity and distance matrices
 ---------------------------------------------------------
@@ -126,7 +159,7 @@ d <- as.dist(snp.distance.matrix/max(snp.distance.matrix))
 h <- hclust(d, method = "ward.D2")
 best.partition.ward <- best_baps_partition(sparse.data, as.phylo(h))
 calc_marginal_llk(sparse.data, best.partition.ward)
-#> [1] -49612.98
+#> [1] -54938.66
 ```
 
 References

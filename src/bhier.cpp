@@ -33,11 +33,12 @@ List bhier(List data, List partitions, NumericVector d_k) {
   std::vector<arma::sp_umat> sp_partition_counts;
 
   // Pre-compute lgamma values up to three decimal places for each possible count lgamma(x+decimal)
-  arma::dmat pre_lgamma = arma::dmat(n_isolates+2, 10000);
+  int lg_size = ceil(max(prior)*1000)+2;
+  arma::dmat pre_lgamma = arma::dmat(n_isolates+2, lg_size);
   for(i=0; i<(n_isolates+2); i++){
-    for(j=0; j<10000; j++){
+    for(j=0; j<lg_size; j++){
       if((i==0) && (j==0)) continue;
-      pre_lgamma(i,j) = lgamma(i+(j*0.0001));
+      pre_lgamma(i,j) = lgamma(i+(j*0.001));
     }
   }
   arma::umat prior_index = arma::umat(5, n_snps);
@@ -46,9 +47,23 @@ List bhier(List data, List partitions, NumericVector d_k) {
       if (prior(i,j)>=1){
         Rcpp::stop("At the moment there is only support for priors < 1");
       }
-      prior_index(i,j) = floor(prior(i,j)/0.0001);
+      prior_index(i,j) = floor(prior(i,j)/0.001);
     }
   }
+
+  //Precompute first term in mllk
+  NumericVector term1(n_isolates+2, 0.0);
+  double alpha_sum = 0.0;
+  for (partition_length=1; partition_length<n_isolates+2; partition_length++){
+    for (j=0; j < n_snps; j++){
+      alpha_sum = 0.0;
+      for(i=0; i<5; i++){
+        alpha_sum += prior(i,j);
+      }
+      term1(partition_length) -= lgamma(partition_length+alpha_sum);
+    }
+  }
+
 
   // Count initial alleles for each partition into sparse matrices.
   for(p=0; p<n_partitions; p++){
@@ -72,7 +87,7 @@ List bhier(List data, List partitions, NumericVector d_k) {
   for(p=0; p<n_partitions; p++){
     partition_length = partition_sizes(p);
     consensus_counts.fill(partition_length);
-    p_tree(p) = -n_snps*pre_lgamma(partition_length+1, 0);
+    p_tree(p) = term1(partition_length); //-n_snps*pre_lgamma(partition_length+1, 0);
 
     for (arma::sp_umat::const_iterator it = sp_partition_counts[p].begin(); it != sp_partition_counts[p].end(); ++it) {
       consensus_counts[it.row()] -= *it;
@@ -91,7 +106,7 @@ List bhier(List data, List partitions, NumericVector d_k) {
       partition_length = partition_sizes(p1)+partition_sizes(p2);
       consensus_counts.fill(partition_length);
 
-      mllk(p1,p2) = -n_snps*pre_lgamma(partition_length+1, 0);
+      mllk(p1,p2) = term1(partition_length); //-n_snps*pre_lgamma(partition_length+1, 0);
 
       for (arma::sp_umat::const_iterator it = res.begin(); it != res.end(); ++it) {
         consensus_counts[it.row()] -= *it;
@@ -170,7 +185,7 @@ List bhier(List data, List partitions, NumericVector d_k) {
       partition_length = partition_sizes(p)+partition_sizes(min_i);
       consensus_counts.fill(partition_length);
 
-      mllk(min_i,p) = -n_snps*pre_lgamma(partition_length+1, 0);;
+      mllk(min_i,p) = term1(partition_length); //-n_snps*pre_lgamma(partition_length+1, 0);;
 
       for (arma::sp_umat::const_iterator it = res.begin(); it != res.end(); ++it) {
         consensus_counts[it.row()] -= *it;

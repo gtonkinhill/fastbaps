@@ -24,11 +24,13 @@ knitr::opts_chunk$set(
 # fastbaps
 
 ## Installation
+
 `fastbaps` is currently available on github. It can be installed with `devtools`
+
 ```{r, eval = FALSE}
 install.packages("devtools")
 
-devtools::install_github("gtonkinhill/fastbaps")
+devtools::install_github("gtonkinhill/fastbaps", auth_token="37064ad364627e23377a492cf790285642256a23")
 ```
 
 If you would like to also build the vignette with your installation run:
@@ -38,6 +40,7 @@ devtools::install_github("gtonkinhill/fastbaps", build_vignettes = TRUE)
 ```
 
 ## Quick Start
+
 Run fastbaps
 
 ```{r, fig.width =8, fig.height=6, fig.align='center'}

@@ -24,17 +24,21 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){
   if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
+  if(!(sparse.data$prior.type %in% c("baps", "mean", "optimised"))) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(n.cores) || n.cores<1) stop("Invalid value for n.cores!")
   if(!is.null(k.init)){
     if(!is.numeric(k.init) | k.init < 0) stop("Invalid value for k.init!")
   }
 
-
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
 
   if (is.null(k.init)){
-    k.init <- ceiling(n.isolates/4)
+    if(sparse.data$prior.type=="baps"){
+      k.init <- ceiling(n.isolates/10)
+    } else {
+      k.init <- ceiling(n.isolates/4)
+    }
   }
 
   # Calculate the initial prior paramters
