@@ -16,7 +16,7 @@
 #' sparse.data <- optimise_prior(sparse.data)
 #'
 #' @export
-optimise_prior <- function(sparse.data, grid.vals=c(0:20/5)){
+optimise_prior <- function(sparse.data, grid.vals=c(0:1000/200)){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -37,16 +37,9 @@ optimise_prior <- function(sparse.data, grid.vals=c(0:20/5)){
   initial.prior <- t(t(initial.prior)/colSums(initial.prior))
   sparse.data$prior <- initial.prior
 
-  mllk1 <- fastbaps:::part_llks(sparse.data, partition)$llk
+  mllks <- fastbaps:::compare_prior_grid(sparse.data, grid.vals)
+  bfs <- mllks[[1]] - mllks
 
-
-  is.included <- 1*(initial.prior>0)
-  bfs <- unlist(lapply(grid.vals, function(cc){
-    sparse.data$prior <- (initial.prior+cc) * is.included
-    sparse.data$prior <- t(t(sparse.data$prior)/colSums(sparse.data$prior)) #rescale to be between 0 and 1
-    mllk2 <- fastbaps:::part_llks(sparse.data, partition)$llk
-    return(mllk1-mllk2)
-  }))
   cc <- grid.vals[which.min(bfs)]
   sparse.data$prior <- initial.prior+cc
   sparse.data$prior <- t(t(sparse.data$prior)/colSums(sparse.data$prior))

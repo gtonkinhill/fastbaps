@@ -35,9 +35,9 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){
 
   if (is.null(k.init)){
     if(sparse.data$prior.type=="baps"){
-      k.init <- ceiling(n.isolates/10)
+      k.init <- max(4, ceiling(n.isolates/10))
     } else {
-      k.init <- ceiling(n.isolates/4)
+      k.init <- max(4, ceiling(n.isolates/4))
     }
   }
 

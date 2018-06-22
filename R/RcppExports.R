@@ -5,6 +5,10 @@ bhier <- function(data, partitions, d_k) {
     .Call(`_fastbaps_bhier`, data, partitions, d_k)
 }
 
+compare_prior_grid <- function(data, grid) {
+    .Call(`_fastbaps_compare_prior_grid`, data, grid)
+}
+
 import_fasta_to_vector_each_nt <- function(file) {
     .Call(`_fastbaps_import_fasta_to_vector_each_nt`, file)
 }

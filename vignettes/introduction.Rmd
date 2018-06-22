@@ -70,7 +70,7 @@ We can compare the log marginal likelihood with that obtained using hierbaps.
 
 ```{r}
 snp.matrix <- load_fasta(fasta.file.name)
-hb.results <- hierBAPS(snp.matrix, max.depth = 2, n.pops = 20, quiet = TRUE)
+hb.results <- hierBAPS(snp.matrix, max.depth = 2, n.pops = 50, quiet = TRUE)
 
 calc_marginal_llk(sparse.data, hb.results$partition.df$`level 1`)
 calc_marginal_llk(sparse.data, best.partition)
