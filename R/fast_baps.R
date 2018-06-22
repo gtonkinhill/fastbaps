@@ -63,7 +63,11 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){
   }
 
   # Cluster the partitions using bhc
-  baps <- fastbaps:::bhier(sparse.data, initial.partition, dk.initial)
+  if(n.cores==1){
+    baps <- fastbaps:::bhier(sparse.data, initial.partition, dk.initial)
+  } else {
+    baps <- fastbaps:::bhier_parallel(sparse.data, initial.partition, dk.initial, n.cores)
+  }
 
   hc <- fastbaps:::combine_clusterings(baps, initial.partition)
 
