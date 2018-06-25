@@ -6,7 +6,7 @@
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param k.init the initial number of clusters to start the bayesian hierarchical clustering from. Defaults to (number of sequences)/4
-#' @param n.cores the number of cores to use in clustering (currently not implemented)
+#' @param n.cores the number of cores to use in clustering
 #'
 #' @return a final clustering
 #'
@@ -14,7 +14,8 @@
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
-#' baps.hc <- fast_baps(sparse.data)
+#' system.time({baps.hc <- fast_baps(sparse.data)
+#' system.time({baps.hc <- fast_baps(sparse.data, n.cores=2)
 #'
 #' @export
 fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){

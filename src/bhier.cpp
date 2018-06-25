@@ -44,9 +44,6 @@ List bhier(List data, List partitions, NumericVector d_k) {
   arma::umat prior_index = arma::umat(5, n_snps);
   for(i=0; i<5; i++){
     for(j=0; j<n_snps; j++){
-      if (prior(i,j)>=1){
-        Rcpp::stop("At the moment there is only support for priors < 1");
-      }
       prior_index(i,j) = floor(prior(i,j)/0.001);
     }
   }

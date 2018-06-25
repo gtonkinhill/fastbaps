@@ -5,6 +5,10 @@ bhier <- function(data, partitions, d_k) {
     .Call(`_fastbaps_bhier`, data, partitions, d_k)
 }
 
+bhier_parallel <- function(data, partitions, d_k, n_cores) {
+    .Call(`_fastbaps_bhier_parallel`, data, partitions, d_k, n_cores)
+}
+
 compare_prior_grid <- function(data, grid) {
     .Call(`_fastbaps_compare_prior_grid`, data, grid)
 }
