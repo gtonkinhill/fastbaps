@@ -15,7 +15,8 @@
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' system.time({baps.hc <- fast_baps(sparse.data)})
-#' system.time({baps.hc.2 <- fast_baps(sparse.data, n.cores=2)})
+#' system.time({baps.hc.2 <- fast_baps(sparse.data, n.cores=8)})
+#' baps.hc$height-baps.hc.2$height
 #'
 #' @export
 fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){

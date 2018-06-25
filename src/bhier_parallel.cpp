@@ -87,11 +87,11 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
 
 
   // Calculate the llk of each partition
-  #pragma omp parallel shared(term1, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index, p_tree)
+  #pragma omp parallel shared(term1, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index, p_tree, partition_sizes) default(none)
   {
     unsigned int pp, k, partition_length_temp;
     int consensus_counts_temp[n_snps];
-    // #pragma omp for
+    #pragma omp for
     for(pp=0; pp<n_partitions; pp++){
       partition_length_temp = partition_sizes[pp];
       std::fill(consensus_counts_temp, consensus_counts_temp + n_snps, partition_length_temp);
@@ -198,34 +198,34 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
       rk(max_i, p1) = -std::numeric_limits<double>::infinity();
     }
 
-    #pragma omp parallel shared(used, term1, mllk, rk, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index,d_k, p_tree) private(min_i)
+    #pragma omp parallel shared(used, term1, mllk, rk, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index,d_k, p_tree) firstprivate(min_i)
     {
     unsigned int pp, k, partition_length_temp;
     int consensus_counts_temp[n_snps];
     #pragma omp for
     for(pp=0; pp<n_partitions; pp++){
-      if(used[pp]==1)  continue;
-      if(pp==min_i) continue;
+      if((used[pp]!=1) && (pp!=min_i)){
 
-      arma::sp_umat res = sp_partition_counts[pp] + sp_partition_counts[min_i];
-      partition_length_temp = partition_sizes[pp]+partition_sizes[min_i];
-      std::fill(consensus_counts_temp, consensus_counts_temp + n_snps, partition_length_temp);
+        arma::sp_umat res = sp_partition_counts[pp] + sp_partition_counts[min_i];
+        partition_length_temp = partition_sizes[pp]+partition_sizes[min_i];
+        std::fill(consensus_counts_temp, consensus_counts_temp + n_snps, partition_length_temp);
 
-      mllk(min_i,pp) = term1(partition_length_temp);
+        mllk(min_i,pp) = term1(partition_length_temp);
 
-      for (arma::sp_umat::const_iterator it = res.begin(); it != res.end(); ++it) {
-        consensus_counts_temp[it.row()] -= *it;
-        mllk(min_i,pp)  += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
+        for (arma::sp_umat::const_iterator it = res.begin(); it != res.end(); ++it) {
+          consensus_counts_temp[it.row()] -= *it;
+          mllk(min_i,pp)  += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
+        }
+
+        for(k=0; k<n_snps; k++){
+          mllk(min_i,pp)  += pre_lgamma(consensus_counts_temp[k], prior_index(0, k))-pre_lgamma(0, prior_index(0, k));
+        }
+
+        mllk(pp,min_i) = mllk(min_i,pp);
+
+        rk(pp,min_i) = mllk(min_i,pp) - p_tree(min_i) - p_tree(pp) + pre_lgamma(partition_length_temp, 0) - d_k(min_i) - d_k(pp);
+        rk(min_i,pp) = rk(pp,min_i);
       }
-
-      for(k=0; k<n_snps; k++){
-        mllk(min_i,pp)  += pre_lgamma(consensus_counts_temp[k], prior_index(0, k))-pre_lgamma(0, prior_index(0, k));
-      }
-
-      mllk(pp,min_i) = mllk(min_i,pp);
-
-      rk(pp,min_i) = mllk(min_i,pp) - p_tree(min_i) - p_tree(pp) + pre_lgamma(partition_length_temp, 0) - d_k(min_i) - d_k(pp);
-      rk(min_i,pp) = rk(pp,min_i);
 
     }
     }
