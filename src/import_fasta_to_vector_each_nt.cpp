@@ -88,22 +88,22 @@ List import_fasta_to_vector_each_nt(std::string file) {
     }
     for(int j=0; j<seq_length; j++){
       temp_char = seq.seq[j];
-      if(((temp_char=='A') && (consensus[j]!=0)) && (consensus[j]!=4) && (allele_counts[0][j]>1)){
+      if((((temp_char=='A') || (temp_char=='a')) && (consensus[j]!=0)) && (consensus[j]!=4) && (allele_counts[0][j]>1)){
         m_i.push_back(n);
         m_j.push_back(j+1);
         m_x.push_back(1);
         n_snps += 1;
-      } else if(((temp_char=='C') && (consensus[j]!=1)) && (consensus[j]!=4) && (allele_counts[1][j]>1)){
+      } else if((((temp_char=='C') || (temp_char=='c')) && (consensus[j]!=1)) && (consensus[j]!=4) && (allele_counts[1][j]>1)){
         m_i.push_back(n);
         m_j.push_back(j+1);
         m_x.push_back(2);
         n_snps += 1;
-      } else if(((temp_char=='G') && (consensus[j]!=2)) && (consensus[j]!=4) && (allele_counts[2][j]>1)){
+      } else if((((temp_char=='G') || (temp_char=='g')) && (consensus[j]!=2)) && (consensus[j]!=4) && (allele_counts[2][j]>1)){
         m_i.push_back(n);
         m_j.push_back(j+1);
         m_x.push_back(3);
         n_snps += 1;
-      } else if(((temp_char=='T') && (consensus[j]!=3)) && (consensus[j]!=4) && (allele_counts[3][j]>1)){
+      } else if((((temp_char=='T') || (temp_char=='t')) && (consensus[j]!=3)) && (consensus[j]!=4) && (allele_counts[3][j]>1)){
         m_i.push_back(n);
         m_j.push_back(j+1);
         m_x.push_back(4);
