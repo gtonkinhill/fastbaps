@@ -9,6 +9,10 @@ bhier_parallel <- function(data, partitions, d_k, n_cores) {
     .Call(`_fastbaps_bhier_parallel`, data, partitions, d_k, n_cores)
 }
 
+calc_ddk <- function(data, merges) {
+    .Call(`_fastbaps_calc_ddk`, data, merges)
+}
+
 compare_prior_grid <- function(data, grid) {
     .Call(`_fastbaps_compare_prior_grid`, data, grid)
 }
@@ -19,5 +23,9 @@ import_fasta_to_vector_each_nt <- function(file) {
 
 part_llks <- function(data, partitions) {
     .Call(`_fastbaps_part_llks`, data, partitions)
+}
+
+tree_llk <- function(data, merges) {
+    .Call(`_fastbaps_tree_llk`, data, merges)
 }
 

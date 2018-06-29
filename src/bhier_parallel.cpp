@@ -145,6 +145,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   IntegerVector group_mems = -seq_len(n_partitions); // Tracks group membership
   NumericMatrix edges((n_partitions-1), 2);
   NumericVector heights((n_partitions-1), 0.0); //hclust height output
+  NumericVector rk_vec((n_partitions-1), 0.0);
   arma::umat used = arma::zeros<arma::umat>(n_partitions); //already clustered
   NumericVector neg_inf_llk_vec(n_partitions, -std::numeric_limits<double>::infinity());
   int row_index, col_index, max_i, min_i;
@@ -175,6 +176,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
     edges(j,1) = group_mems[max_i];
 
     heights[j] = mllk(row_index,col_index);
+    rk_vec[j] = rk(row_index,col_index);
 
     group_mems[min_i] = j+1;
 
@@ -234,6 +236,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
 
   return(List::create(Named("initial_partition_llk") = initial_partition_llk,
                       Named("edges") = edges,
-                      Named("heights")= heights));
+                      Named("heights")= heights,
+                      Named("rk")=rk_vec));
 
 }

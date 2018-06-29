@@ -7,19 +7,24 @@
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param k.init the initial number of clusters to start the bayesian hierarchical clustering from. Defaults to (number of sequences)/4
 #' @param n.cores the number of cores to use in clustering
+#' @param quiet whether or not to print progress information (default=FALSE)
 #'
 #' @return a final clustering
 #'
 #' @examples
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
+#' library(Matrix)
+#' library(fastbaps)
+#' #fasta.file.name <- "../fastbaps_manuscript/data/HIV/hiv_refs_prrt_trim.fas"
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' system.time({baps.hc <- fast_baps(sparse.data)})
-#' system.time({baps.hc.2 <- fast_baps(sparse.data, n.cores=8)})
+#' system.time({baps.hc.2 <- fast_baps(sparse.data, n.cores=4)})
 #' baps.hc$height-baps.hc.2$height
 #'
 #' @export
-fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){
+fast_baps <- function(sparse.data, k.init=NULL, n.cores=1, quiet=FALSE){
+  MAX_CLUSTER_TO_KMEANS <- 10000
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -44,27 +49,65 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1){
   }
 
   # Calculate the initial prior paramters
+  if(!quiet){
+    print("Calculating initial clustering...")
+  }
   if(k.init>=n.isolates){
     initial.partition <- as.list(1:n.isolates)
     dk.initial <- rep(0, n.isolates)
   } else {
-    snp.dist <- as.matrix(tcrossprod(t(sparse.data$snp.matrix>0)))
-    snp.dist <- as.dist((max(snp.dist)-snp.dist)/max(snp.dist))
-    h <- hclust(snp.dist, method = "ward.D2")
+    if(n.isolates<MAX_CLUSTER_TO_KMEANS){
+      snp.dist <- as.matrix(tcrossprod(t(sparse.data$snp.matrix>0)))
+      snp.dist <- as.dist((max(snp.dist)-snp.dist)/max(snp.dist))
+      h <- hclust(snp.dist, method = "ward.D2")
+
+
+
+    } else {
+      if(!quiet){
+        print("Large number of sequences so doing an initial split using kmeans...")
+      }
+      #as we are only interested in the lowere branches of the dendrogram we can take advatange of a fast
+      #algorithm like kmeans to reduce the complexity of the problem
+      pc <- irlba::prcomp_irlba(1*t(sparse.data$snp.matrix>0), n=50)
+      k.n.clusters <- ceiling(n.isolates/MAX_CLUSTER_TO_KMEANS)
+      k <- kmeans(pc$x, centers = k.n.clusters, iter.max = 50, nstart = 5)$cluster
+      while(max(table(k))>MAX_CLUSTER_TO_KMEANS){
+        k.n.clusters <- k.n.clusters*2
+        k <- kmeans(pc$x, centers = k.n.clusters, iter.max = 50, nstart = 5)$cluster
+      }
+
+      hclist <- lapply(split(1:n.isolates, k), function(k.part){
+        snp.dist <- as.matrix(tcrossprod(t(sparse.data$snp.matrix[,k.part]>0)))
+        snp.dist <- as.dist((max(snp.dist)-snp.dist)/max(snp.dist))
+        ht <- hclust(snp.dist, method = "ward.D2")
+        ht$height <- round(ht$height, 6) #to stop us running into precision issues
+        return(ht)
+      })
+      h <- merge_hclust(hclist)
+    }
+    if(!quiet){
+      print("Calculating initial dk values...")
+    }
     phylo <- ape::as.phylo(h)
     initial.partition <- split(1:n.isolates, cutree(h, k = min(n.isolates, k.init)))
-    dk.initial <- unlist(lapply(initial.partition, function(part){
-      if(length(part)<=1){
-        return(0)
-      }
-      mrca <- ape::getMRCA(phylo, part)
-      temp.clade <- ape::extract.clade(phylo, mrca)
-      return(fastbaps:::get_dk(temp.clade))
-    }))
-    dk.initial <- rep(0, length(initial.partition))
+    dk.initial <- unlist(parallel::mclapply(initial.partition, function(part){
+      return(get_dk_run(length(part)))
+    #   if(length(part)<=1){
+    #     return(0)
+    #   } else if(length(part)<=3){
+    #     return(get_dk_run(length(part)))
+    #   }
+    #   mrca <- ape::getMRCA(phylo, part)
+    #   temp.clade <- ape::extract.clade(phylo, mrca)
+    #   return(fastbaps:::get_dk(temp.clade))
+    }, mc.cores = n.cores))
   }
 
   # Cluster the partitions using bhc
+  if(!quiet){
+    print("Clustering using hierarchical Bayesian clustering...")
+  }
   if(n.cores==1){
     baps <- fastbaps:::bhier(sparse.data, initial.partition, dk.initial)
   } else {
@@ -162,5 +205,17 @@ log_add <- function(u, v){
   return(max(u, v) + log(exp(u - max(u, v)) + exp(v - max(u, v))))
 }
 
+get_dk_run <- function(n.tips){
+  if(n.tips==1) return(0)
+  return(log_add(lgamma(n.tips), get_dk_run(n.tips-1)))
+}
 
+merge_hclust <- function(hclist) {
+  d <- as.dendrogram(hclist[[1]])
+  for (i in 2:length(hclist)) {
+    # print(i)
+    d <- merge(d, as.dendrogram(hclist[[i]]))
+  }
+  as.hclust(d)
+}
 
