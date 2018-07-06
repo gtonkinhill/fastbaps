@@ -2,7 +2,7 @@
 #'
 #' Imports a fasta file to a sparse matrix representing SNPs from the consensus
 #'
-#' @useDynLib fastbaps, .registration = TRUE
+#' @useDynLib fastbaps
 #' @importFrom Rcpp sourceCpp
 #' @import Matrix
 #'

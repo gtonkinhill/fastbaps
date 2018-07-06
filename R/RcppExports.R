@@ -2,30 +2,30 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 bhier <- function(data, partitions, d_k) {
-    .Call('_fastbaps_bhier', PACKAGE = 'fastbaps', data, partitions, d_k)
+    .Call(`_fastbaps_bhier`, data, partitions, d_k)
 }
 
 bhier_parallel <- function(data, partitions, d_k, n_cores) {
-    .Call('_fastbaps_bhier_parallel', PACKAGE = 'fastbaps', data, partitions, d_k, n_cores)
+    .Call(`_fastbaps_bhier_parallel`, data, partitions, d_k, n_cores)
 }
 
 calc_ddk <- function(data, merges) {
-    .Call('_fastbaps_calc_ddk', PACKAGE = 'fastbaps', data, merges)
+    .Call(`_fastbaps_calc_ddk`, data, merges)
 }
 
 compare_prior_grid <- function(data, grid) {
-    .Call('_fastbaps_compare_prior_grid', PACKAGE = 'fastbaps', data, grid)
+    .Call(`_fastbaps_compare_prior_grid`, data, grid)
 }
 
 import_fasta_to_vector_each_nt <- function(file) {
-    .Call('_fastbaps_import_fasta_to_vector_each_nt', PACKAGE = 'fastbaps', file)
+    .Call(`_fastbaps_import_fasta_to_vector_each_nt`, file)
 }
 
 part_llks <- function(data, partitions) {
-    .Call('_fastbaps_part_llks', PACKAGE = 'fastbaps', data, partitions)
+    .Call(`_fastbaps_part_llks`, data, partitions)
 }
 
 tree_llk <- function(data, merges) {
-    .Call('_fastbaps_tree_llk', PACKAGE = 'fastbaps', data, merges)
+    .Call(`_fastbaps_tree_llk`, data, merges)
 }
 
