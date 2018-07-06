@@ -2,7 +2,6 @@
 #'
 #' Function to perform Bayesian hierarchical clustering of population structure.
 #'
-#' [[Rcpp::plugins(cpp11)]]
 #'
 #' @import Matrix
 #'
