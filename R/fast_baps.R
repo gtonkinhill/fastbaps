@@ -2,6 +2,8 @@
 #'
 #' Function to perform Bayesian hierarchical clustering of population structure.
 #'
+#' [[Rcpp::plugins(cpp11)]]
+#'
 #' @import Matrix
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt

@@ -22,3 +22,4 @@ Suggests: knitr,
     ggplot2
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 6.0.1
+SystemRequirements: C++11
