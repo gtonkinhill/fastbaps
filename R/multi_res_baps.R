@@ -6,7 +6,7 @@
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param levels the number of levels to investigate (default=2)
-#' @param optimise.priors whether or not to re-optimise the prior at each level (default=TRUE)
+#' @param type what type of prior optimisation to use. One of 'none', 'hc' or 'flat' (default)
 #' @param n.cores the number of cores to use in clustering
 #'
 #' @return a data.frame representing the final clustering at multiple resolutions
@@ -17,8 +17,9 @@
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' multi.res.df <- multi_res_baps(sparse.data, levels=2)
 #'
+#'
 #' @export
-multi_res_baps <- function(sparse.data, levels=2, optimise.priors=TRUE, n.cores=1){
+multi_res_baps <- function(sparse.data, levels=2, type="none", n.cores=1){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -28,6 +29,7 @@ multi_res_baps <- function(sparse.data, levels=2, optimise.priors=TRUE, n.cores=
   if(!(sparse.data$prior.type %in% c("baps", "mean", "optimised"))) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(n.cores) || n.cores<1) stop("Invalid value for n.cores!")
   if(!is.numeric(levels) | levels < 0) stop("Invalid value for levels!")
+  if(!(type %in% c("flat", "none", "hc"))) stop("Invalid value for type!")
 
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
@@ -42,24 +44,28 @@ multi_res_baps <- function(sparse.data, levels=2, optimise.priors=TRUE, n.cores=
     new.partitions <- rep(NA, n.isolates)
     for (p in seq_along(prev.partition)){
       part <- prev.partition[[p]]
-      temp.data <- sparse.data
-      temp.data$snp.matrix <- temp.data$snp.matrix[,part,drop=FALSE]
-      rs <- rowSums(temp.data$snp.matrix>0)
-      keep <- rs>0
-      keep <- keep & (rs<length(part))
-      if(sum(keep)<=0){
-        new.partitions[part] <- n.isolates*p*2
-        next
-      }
-      temp.data$snp.matrix <- temp.data$snp.matrix[keep, , drop=FALSE]
-      temp.data$prior <- temp.data$prior[, keep, drop=FALSE]
-      temp.data$consensus <- temp.data$consensus[keep]
-      if(optimise.priors){
-        temp.data <- fastbaps::optimise_prior(temp.data)
-      }
+      if (length(part)>4){
+        temp.data <- sparse.data
+        temp.data$snp.matrix <- temp.data$snp.matrix[,part,drop=FALSE]
+        rs <- rowSums(temp.data$snp.matrix>0)
+        keep <- rs>0
+        keep <- keep & (rs<length(part))
+        if(sum(keep)<=0){
+          new.partitions[part] <- n.isolates*p*2
+          next
+        }
+        temp.data$snp.matrix <- temp.data$snp.matrix[keep, , drop=FALSE]
+        temp.data$prior <- temp.data$prior[, keep, drop=FALSE]
+        temp.data$consensus <- temp.data$consensus[keep]
+        if(type!="none"){
+          temp.data <- fastbaps::optimise_prior(temp.data, n.cores = n.cores, type = type)
+        }
 
-      fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores)
-      new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition(temp.data, ape::as.phylo(fb))
+        fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores)
+        new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition_hclust(temp.data, fb)
+      } else {
+        new.partitions[part] <- n.isolates*p*2
+      }
     }
     #relabel 1:n.clusters
     cluster.results[,l+1] <- as.numeric(factor(new.partitions))
