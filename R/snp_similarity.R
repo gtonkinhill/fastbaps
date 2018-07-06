@@ -2,8 +2,6 @@
 #'
 #' Function to calculate pairwise snp similarity matrix
 #'
-#' @useDynLib fastbaps
-#' @importFrom Rcpp sourceCpp
 #' @import Matrix
 #'
 #' @param sparse.matrix a sparse SNP data object returned from import_fasta_sparse_nt
