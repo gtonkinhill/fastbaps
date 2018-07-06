@@ -63,7 +63,7 @@ baps.hc <- fast_baps(sparse.data)
 This provides a Bayesian hierarchical clustering of the data. To obtain the partition of this hierarchy that maximises the marginal likelihood run
 
 ```{r}
-best.partition <- best_baps_partition_hclust(sparse.data, baps.hc)
+best.partition <- best_baps_partition(sparse.data, baps.hc)
 ```
 
 We can compare the log marginal likelihood with that obtained using hierbaps.
@@ -102,7 +102,7 @@ We can compare this result to other priors, either flat or the population mean b
 sparse.data <- optimise_prior(sparse.data, type = "flat")
 
 baps.hc <- fast_baps(sparse.data)
-best.partition <- best_baps_partition_hclust(sparse.data, baps.hc)
+best.partition <- best_baps_partition(sparse.data, baps.hc)
 
 plot.df <- data.frame(id=colnames(sparse.data$snp.matrix),
                       val=hb.results$partition.df$`level 1`,
@@ -123,7 +123,7 @@ f2
 sparse.data <- optimise_prior(sparse.data, type = "hc")
 
 baps.hc <- fast_baps(sparse.data)
-best.partition <- best_baps_partition_hclust(sparse.data, baps.hc)
+best.partition <- best_baps_partition(sparse.data, baps.hc)
 
 plot.df <- data.frame(id=colnames(sparse.data$snp.matrix),
                       val=hb.results$partition.df$`level 1`,
@@ -144,11 +144,12 @@ we can also investigate multiple levels
 
 ```{r}
 sparse.data <- import_fasta_sparse_nt(fasta.file.name, prior = "baps")
-multi <- multi_res_baps(sparse.data, type = "none")
+multi <- multi_res_baps(sparse.data)
 
 plot.df <- data.frame(id=colnames(sparse.data$snp.matrix),
                       val=hb.results$partition.df$`level 1`,
                       fastbaps=multi$`Level 1`,
+                      fastbaps2=multi$`Level 2`,
                       stringsAsFactors = FALSE)
 
 gg <- ggtree(iqtree)
@@ -157,18 +158,18 @@ gg <- gg %<+% data.frame(id=colnames(sparse.data$snp.matrix),
 gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
 
 f1 <- facet_plot(gg, panel="hierBAPS", data=plot.df, geom=geom_tile, aes(x=val), color='red')
-f2 <- facet_plot(f1, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
+f2 <- facet_plot(f1, panel="fastbaps level 1", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
+f2 <- facet_plot(f1, panel="fastbaps level 2", data=plot.df, geom=geom_tile, aes(x=fastbaps2), color='green')
 f2
 ```
 
 finally we can condition on an initial hierarchy or phylogeny.
 
 ```{r}
-sparse.data <- optimise_prior(sparse.data, type = "flat")
 sparse.data <- import_fasta_sparse_nt(fasta.file.name, prior = "baps")
 
 iqtree.rooted <- phytools::midpoint.root(iqtree)
-best.partition <- best_baps_partition_hclust(sparse.data, iqtree.rooted)
+best.partition <- best_baps_partition(sparse.data, iqtree.rooted)
 
 temp.df <- hb.results$partition.df[match(iqtree.rooted$tip.label, hb.results$partition.df$Isolate),]
 
@@ -201,7 +202,7 @@ By using the distance matrix to very quickly calculate a hierarchy using Ward's 
 ```{r}
 d <- as.dist(snp.distance.matrix/max(snp.distance.matrix))
 h <- hclust(d, method = "ward.D2")
-best.partition.ward <- best_baps_partition_hclust(sparse.data, h)
+best.partition.ward <- best_baps_partition(sparse.data, h)
 calc_marginal_llk(sparse.data, best.partition.ward)
 ```
 

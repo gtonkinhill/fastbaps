@@ -6,7 +6,6 @@
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param levels the number of levels to investigate (default=2)
-#' @param type what type of prior optimisation to use. One of 'none', 'hc' or 'flat' (default)
 #' @param n.cores the number of cores to use in clustering
 #'
 #' @return a data.frame representing the final clustering at multiple resolutions
@@ -19,17 +18,15 @@
 #'
 #'
 #' @export
-multi_res_baps <- function(sparse.data, levels=2, type="none", n.cores=1){
+multi_res_baps <- function(sparse.data, levels=2, n.cores=1){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
-  if(!(sparse.data$prior.type %in% c("baps", "mean", "optimised"))) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(n.cores) || n.cores<1) stop("Invalid value for n.cores!")
   if(!is.numeric(levels) | levels < 0) stop("Invalid value for levels!")
-  if(!(type %in% c("flat", "none", "hc"))) stop("Invalid value for type!")
 
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
@@ -57,12 +54,9 @@ multi_res_baps <- function(sparse.data, levels=2, type="none", n.cores=1){
         temp.data$snp.matrix <- temp.data$snp.matrix[keep, , drop=FALSE]
         temp.data$prior <- temp.data$prior[, keep, drop=FALSE]
         temp.data$consensus <- temp.data$consensus[keep]
-        if(type!="none"){
-          temp.data <- fastbaps::optimise_prior(temp.data, n.cores = n.cores, type = type)
-        }
 
         fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores)
-        new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition_hclust(temp.data, fb)
+        new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition(temp.data, fb)
       } else {
         new.partitions[part] <- n.isolates*p*2
       }

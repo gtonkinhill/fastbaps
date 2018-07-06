@@ -22,10 +22,10 @@
 #' newick.file.name <- system.file("extdata", "seqs.fa.treefile", package = "fastbaps")
 #' iqtree <- phytools::read.newick(newick.file.name)
 #' h <- phytools::midpoint.root(iqtree)
-#' best.partition <- best_baps_partition_hclust(sparse.data, h)
+#' best.partition <- best_baps_partition(sparse.data, h)
 #'
 #' @export
-best_baps_partition_hclust <- function(sparse.data, h, quiet=FALSE){
+best_baps_partition <- function(sparse.data, h, quiet=FALSE){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
