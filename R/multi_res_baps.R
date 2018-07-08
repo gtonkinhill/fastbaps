@@ -6,7 +6,7 @@
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param levels the number of levels to investigate (default=2)
-#' @param cut.fraction the fraction off initial cluster (default=4)
+#' @param k.init the initial number of clusters for the top level (default=n.isolates/4)
 #' @param n.cores the number of cores to use in clustering
 #'
 #' @return a data.frame representing the final clustering at multiple resolutions
@@ -19,7 +19,7 @@
 #'
 #'
 #' @export
-multi_res_baps <- function(sparse.data, levels=2, cut.fraction=4, n.cores=1){
+multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -55,8 +55,12 @@ multi_res_baps <- function(sparse.data, levels=2, cut.fraction=4, n.cores=1){
         temp.data$snp.matrix <- temp.data$snp.matrix[keep, , drop=FALSE]
         temp.data$prior <- temp.data$prior[, keep, drop=FALSE]
         temp.data$consensus <- temp.data$consensus[keep]
+        if((l==1) && !is.null(k.init)){
+          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = k.init)
+        } else {
+          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores)
+        }
 
-        fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = floor(length(part)/cut.fraction))
         new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition(temp.data, fb)
       } else {
         new.partitions[part] <- n.isolates*p*2
