@@ -1,4 +1,4 @@
-#' best_baps_partition_hclust
+#' best_baps_partition
 #'
 #' Function to combine smaller clusters from a fast hierarchical algorithm to maximise the BAPS likelihood.
 #'
@@ -17,7 +17,7 @@
 #' d <- snp_dist(sparse.data)
 #' d <- as.dist(d/max(d))
 #' h <- hclust(d, method="ward.D2")
-#' partition <- best_baps_partition_hclust(sparse.data, h)
+#' partition <- best_baps_partition(sparse.data, h)
 #'
 #' newick.file.name <- system.file("extdata", "seqs.fa.treefile", package = "fastbaps")
 #' iqtree <- phytools::read.newick(newick.file.name)

@@ -15,12 +15,8 @@
 #' @examples
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
-#' library(Matrix)
-#' library(fastbaps)
-#' #fasta.file.name <- "../fastbaps_manuscript/data/HIV/hiv_refs_prrt_trim.fas"
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' system.time({baps.hc <- fast_baps(sparse.data)})
-#' system.time({baps.hc.2 <- fast_baps(sparse.data, n.cores=4)})
 #'
 #' @export
 fast_baps <- function(sparse.data, k.init=NULL, n.cores=1, quiet=FALSE){
