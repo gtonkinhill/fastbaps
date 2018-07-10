@@ -10,6 +10,8 @@ using namespace std;
 // [[Rcpp::export]]
 List tree_llk(List data, arma::imat merges) {
 
+  double alpha = log(1.0); //Remove this when I've written up why it's not needed.
+
   const arma::sp_mat& snp_matrix = data[0];
 
   NumericVector consensus = data[1];
@@ -26,7 +28,7 @@ List tree_llk(List data, arma::imat merges) {
   std::vector<arma::sp_umat> sp_partition_counts;
 
   // Pre-compute lgamma values up to three decimal places for each possible count lgamma(x+decimal)
-  int lg_size = ceil(max(prior)*1000)+2;
+  int lg_size = ceil(max(prior)*1000)+3;
   arma::dmat pre_lgamma = arma::dmat(n_isolates+2, lg_size);
   for(i=0; i<(n_isolates+2); i++){
     for(j=0; j<lg_size; j++){
@@ -37,7 +39,7 @@ List tree_llk(List data, arma::imat merges) {
   arma::umat prior_index = arma::umat(5, n_snps);
   for(i=0; i<5; i++){
     for(j=0; j<n_snps; j++){
-      prior_index(i,j) = floor(prior(i,j)/0.001);
+      prior_index(i,j) = ceil(prior(i,j)/0.001);
     }
   }
 
@@ -50,7 +52,7 @@ List tree_llk(List data, arma::imat merges) {
       for(i=0; i<5; i++){
         alpha_sum += prior(i,j);
       }
-      term1(partition_length) -= lgamma(partition_length+alpha_sum);
+      term1(partition_length) += lgamma(alpha_sum) - lgamma(partition_length+alpha_sum);
     }
   }
 
@@ -78,16 +80,18 @@ List tree_llk(List data, arma::imat merges) {
   // initilise first n_isolate elements of arrays
   for(i=0; i<n_isolates; i++){
     clust_size(i) = 1;
-    dk[i] = 0.0;
+    dk[i] = alpha;//0.0;
 
     std::fill(consensus_counts, consensus_counts + n_snps, 1);
     mllk[i] = term1(1);
     for (arma::sp_umat::const_iterator it = sp_partition_counts[i].begin(); it != sp_partition_counts[i].end(); ++it) {
       consensus_counts[it.row()] -= *it;
       mllk[i]  += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
+      // mllk[i]  += lgamma(*it + prior(1+it.col(), it.row()))-lgamma(prior(1+it.col(), it.row()));
     }
     for(j=0; j<n_snps; j++){
       mllk[i] += pre_lgamma(consensus_counts[j], prior_index(0, j))-pre_lgamma(0, prior_index(0, j));
+      // mllk[i] += lgamma(consensus_counts[j] + prior(0, j))-lgamma(prior(0, j));
     }
     ptree[i] = mllk[i];
     rk[i] = std::numeric_limits<double>::infinity();
@@ -111,7 +115,8 @@ List tree_llk(List data, arma::imat merges) {
     sp_partition_counts.push_back(sp_partition_counts[left] + sp_partition_counts[right]);
     count+=1;
 
-    dk[i] = log_sum_exp(pre_lgamma(clust_size(i), 0), dk[left]+dk[right]);
+    dk[i] = log_sum_exp(alpha + pre_lgamma(clust_size(i), 0), dk[left]+dk[right]);
+    // dk[i] = log_sum_exp(alpha + lgamma(clust_size(i)), dk[left]+dk[right]);
 
     // calculate the i_th mllk
     std::fill(consensus_counts, consensus_counts + n_snps, clust_size(i));
@@ -119,17 +124,23 @@ List tree_llk(List data, arma::imat merges) {
     for (arma::sp_umat::const_iterator it = sp_partition_counts[i].begin(); it != sp_partition_counts[i].end(); ++it) {
       consensus_counts[it.row()] -= *it;
       mllk[i]  += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
+      // mllk[i]  += lgamma(*it + prior(1+it.col(), it.row()))-lgamma(prior(1+it.col(), it.row()));
     }
     for(j=0; j<n_snps; j++){
       mllk[i] += pre_lgamma(consensus_counts[j], prior_index(0, j))-pre_lgamma(0, prior_index(0, j));
+      // mllk[i] += lgamma(consensus_counts[j] + prior(0, j))-lgamma(prior(0, j));
     }
 
     // calculate the i_th ptree
-    ptree[i] = log_sum_exp(pre_lgamma(clust_size(i), 0) + mllk[i] - dk[i],
+    ptree[i] = log_sum_exp(alpha + pre_lgamma(clust_size(i), 0) + mllk[i] - dk[i],
            dk[left] + dk[right] + ptree[left] + ptree[right] - dk[i]);
+    // ptree[i] = log_sum_exp(alpha + lgamma(clust_size(i)) + mllk[i] - dk[i],
+    //                        dk[left] + dk[right] + ptree[left] + ptree[right] - dk[i]);
 
     // calculate the i_th rk
-    rk[i] = mllk[i] - ptree[left] - ptree[right] + pre_lgamma(clust_size(i), 0) - dk[left] - dk[right];
+    //rk[i] = mllk[i] - ptree[left] - ptree[right] + pre_lgamma(clust_size(i), 0) - dk[left] - dk[right];
+    rk[i] = mllk[i] - log_sum_exp(mllk[i], (dk[left] + dk[right] - alpha - pre_lgamma(clust_size(i), 0)) + ptree[left] + ptree[right]);
+    // rk[i] = mllk[i] - log_sum_exp(mllk[i], (dk[left] + dk[right] - alpha - lgamma(clust_size(i))) + ptree[left] + ptree[right]);
 
 
   }

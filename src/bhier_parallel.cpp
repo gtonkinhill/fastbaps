@@ -39,7 +39,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   std::vector<arma::sp_umat> sp_partition_counts;
 
   // Pre-compute lgamma values up to three decimal places for each possible count lgamma(x+decimal)
-  int lg_size = ceil(max(prior)*1000)+2;
+  int lg_size = ceil(max(prior)*1000)+3;
   arma::dmat pre_lgamma = arma::dmat(n_isolates+2, lg_size);
   for(i=0; i<(n_isolates+2); i++){
     for(j=0; j<lg_size; j++){
@@ -50,7 +50,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   arma::umat prior_index = arma::umat(5, n_snps);
   for(i=0; i<5; i++){
     for(j=0; j<n_snps; j++){
-      prior_index(i,j) = floor(prior(i,j)/0.001);
+      prior_index(i,j) = ceil(prior(i,j)/0.001);
     }
   }
 
@@ -63,7 +63,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
       for(i=0; i<5; i++){
         alpha_sum += prior(i,j);
       }
-      term1(partition_length) -= lgamma(partition_length+alpha_sum);
+      term1(partition_length) += lgamma(alpha_sum) - lgamma(partition_length+alpha_sum);
     }
   }
 

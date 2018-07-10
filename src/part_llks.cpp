@@ -35,7 +35,7 @@ List part_llks(List data, List partitions) {
   arma::umat prior_index = arma::umat(5, n_snps);
   for(i=0; i<5; i++){
     for(j=0; j<n_snps; j++){
-      prior_index(i,j) = floor(prior(i,j)/0.001);
+      prior_index(i,j) = ceil(prior(i,j)/0.001);
     }
   }
 
@@ -48,9 +48,16 @@ List part_llks(List data, List partitions) {
       for(i=0; i<5; i++){
         alpha_sum += prior(i,j);
       }
-      term1(partition_length) -= lgamma(partition_length+alpha_sum);
+      term1(partition_length) += lgamma(alpha_sum) - lgamma(partition_length+alpha_sum);
     }
   }
+
+//     #calculate log marginal likelihood
+//     term1 <- -lgamma(1 + mA+mC+mG+mT)
+//     term2 <- lgamma(prior["a", ] + mA) - lgamma(prior["a", ])
+//     term2 <- term2 + lgamma(prior["c", ] + mC) - lgamma(prior["c", ])
+//     term2 <- term2 + lgamma(prior["g", ] + mG) - lgamma(prior["g", ])
+//     term2 <- term2 + lgamma(prior["t", ] + mT) - lgamma(prior["t", ])
 
   for(p=0; p<n_partitions; p++){
     IntegerVector partition = partitions(p);
@@ -73,14 +80,17 @@ List part_llks(List data, List partitions) {
 
     for (arma::sp_umat::const_iterator it = sparse_partition_counts.begin(); it != sparse_partition_counts.end(); ++it) {
       consensus_counts[it.row()] -= *it;
-      llk(p) += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
+      // llk(p) += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
+      llk(p) += lgamma(*it + prior(1+it.col(), it.row()))-lgamma(prior(1+it.col(), it.row()));
     }
     for(i=0; i<n_snps; i++){
-      llk(p) += pre_lgamma(consensus_counts[i], prior_index(0, i))-pre_lgamma(0, prior_index(0, i));
+      // llk(p) += pre_lgamma(consensus_counts[i], prior_index(0, i))-pre_lgamma(0, prior_index(0, i));
+      llk(p) += lgamma(consensus_counts[i] + prior(0, i))-lgamma(prior(0, i));
     }
 
   }
 
-  return(List::create(Named("llk") = llk));
+  return(List::create(Named("llk") = llk,
+                      Named("term1") = term1));
 
 }

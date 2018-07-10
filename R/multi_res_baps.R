@@ -15,7 +15,9 @@
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
+#' sparse.data <- optimise_prior(sparse.data, type = "hc", n.cores = 4)
 #' multi.res.df <- multi_res_baps(sparse.data, levels=2)
+#'
 #'
 #'
 #' @export
@@ -41,6 +43,7 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1){
 
     new.partitions <- rep(NA, n.isolates)
     for (p in seq_along(prev.partition)){
+      print(p)
       part <- prev.partition[[p]]
       if (length(part)>4){
         temp.data <- sparse.data
@@ -48,7 +51,7 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1){
         rs <- rowSums(temp.data$snp.matrix>0)
         keep <- rs>0
         keep <- keep & (rs<length(part))
-        if(sum(keep)<=0){
+        if(sum(keep)<=1){
           new.partitions[part] <- n.isolates*p*2
           next
         }
@@ -58,6 +61,7 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1){
         if((l==1) && !is.null(k.init)){
           fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = k.init)
         } else {
+          print(sum(keep))
           fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores)
         }
 
