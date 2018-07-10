@@ -14,7 +14,6 @@
 #'
 #' @examples
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
-#' # fasta.file.name <- "../fastbaps_manuscript/data/ebola/Makona_1610_cds_ig.fas"
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' sparse.data <- optimise_prior(sparse.data)
 #'

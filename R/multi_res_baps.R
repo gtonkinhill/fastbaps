@@ -15,7 +15,6 @@
 #'
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
-#' sparse.data <- optimise_prior(sparse.data, type = "hc", n.cores = 4)
 #' multi.res.df <- multi_res_baps(sparse.data, levels=2)
 #'
 #'
