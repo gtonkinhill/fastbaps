@@ -8,6 +8,7 @@
 #' @param levels the number of levels to investigate (default=2)
 #' @param k.init the initial number of clusters for the top level (default=n.isolates/4)
 #' @param n.cores the number of cores to use in clustering
+#' @param quiet whether to print additional information or not (default=TRUE)
 #'
 #' @return a data.frame representing the final clustering at multiple resolutions
 #'
@@ -20,7 +21,7 @@
 #'
 #'
 #' @export
-multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1){
+multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1, quiet=TRUE){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -36,13 +37,12 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1){
   cluster.results <- matrix(1, nrow = n.isolates, ncol = levels+1)
 
   for (l in seq_len(levels)){
-    print(paste("Clustering at level", l))
+    if(!quiet) print(paste("Clustering at level", l))
 
     prev.partition <- split(1:n.isolates, cluster.results[,l])
 
     new.partitions <- rep(NA, n.isolates)
     for (p in seq_along(prev.partition)){
-      print(p)
       part <- prev.partition[[p]]
       if (length(part)>4){
         temp.data <- sparse.data
@@ -58,13 +58,12 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1){
         temp.data$prior <- temp.data$prior[, keep, drop=FALSE]
         temp.data$consensus <- temp.data$consensus[keep]
         if((l==1) && !is.null(k.init)){
-          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = k.init)
+          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = k.init, quiet = quiet)
         } else {
-          print(sum(keep))
-          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores)
+          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, quiet = quiet)
         }
 
-        new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition(temp.data, fb)
+        new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition(temp.data, fb, quiet = quiet)
       } else {
         new.partitions[part] <- n.isolates*p*2
       }

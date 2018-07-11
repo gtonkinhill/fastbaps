@@ -43,7 +43,7 @@ optimise_prior <- function(sparse.data, grid.vals=c(1:100/20), type = "flat", n.
     initial.prior[1,] <- initial.prior[1,] - colSums(initial.prior[2:5,])
     initial.prior <- initial.prior + 1
     initial.prior <- t(t(initial.prior)/colSums(initial.prior))
-    initial.prior[initial.prior<MIN_RES] <- MIN_RES
+    initial.prior <- ceiling(initial.prior*1000)/1000
     sparse.data$prior <- initial.prior
 
     ptrees <- unlist(parallel::mclapply(grid.vals, function(cc){
@@ -58,6 +58,7 @@ optimise_prior <- function(sparse.data, grid.vals=c(1:100/20), type = "flat", n.
     bfs <- ptrees[[1]] - ptrees
 
     cc <- grid.vals[which.min(bfs)]
+    llk.max <- ptrees[which.max(ptrees)]
     sparse.data$prior <- initial.prior*cc
   } else if (type=="combined"){
     #initialise prior
@@ -66,14 +67,17 @@ optimise_prior <- function(sparse.data, grid.vals=c(1:100/20), type = "flat", n.
                               rowSums(sparse.data$snp.matrix==2),
                               rowSums(sparse.data$snp.matrix==3),
                               rowSums(sparse.data$snp.matrix==4)), nrow = 5, byrow = TRUE)
+    weight <- colSums(initial.prior)/ncol(sparse.data$snp.matrix)
     initial.prior[1,] <- initial.prior[1,] - colSums(initial.prior[2:5,])
-    initial.prior <- initial.prior + 1
+    # initial.prior <- initial.prior+1
+    initial.prior <- (initial.prior>0)*1
     initial.prior <- t(t(initial.prior)/colSums(initial.prior))
-    initial.prior[initial.prior<MIN_RES] <- MIN_RES
+    initial.prior <- t(t(initial.prior)*weight)
+    initial.prior <- ceiling(initial.prior*1000)/1000
     sparse.data$prior <- initial.prior
 
     ptrees <- unlist(parallel::mclapply(grid.vals, function(cc){
-      sparse.data$prior <- initial.prior + cc
+      sparse.data$prior <- initial.prior * cc
       sparse.data$prior[sparse.data$prior<MIN_RES] <- MIN_RES
       llks <- fastbaps:::tree_llk(sparse.data, h$merge)
       return(llks$ptree[length(llks$ptree)])
@@ -82,23 +86,18 @@ optimise_prior <- function(sparse.data, grid.vals=c(1:100/20), type = "flat", n.
     bfs <- ptrees[[1]] - ptrees
 
     cc <- grid.vals[which.min(bfs)]
-    sparse.data$prior <- initial.prior + cc
+    sparse.data$prior <- initial.prior * cc
   } else {
     initial.prior <- matrix(MIN_RES, nrow = nrow(sparse.data$prior), ncol = ncol(sparse.data$prior))
     sparse.data$prior <- initial.prior
 
     ptrees <- unlist(parallel::mclapply(grid.vals, function(cc){
       sparse.data$prior <- initial.prior + cc
-      sparse.data$prior[sparse.data$prior<MIN_RES] <- MIN_RES
-      sparse.data$prior <- t(t(sparse.data$prior)/colSums(sparse.data$prior))
       llks <- fastbaps:::tree_llk(sparse.data, h$merge)
       return(llks$ptree[length(llks$ptree)])
     }, mc.cores = n.cores))
 
     bfs <- ptrees[[1]] - ptrees
-
-    # mllks <- fastbaps:::compare_prior_grid(sparse.data, grid.vals)
-    # bfs <- mllks[[1]] - mllks
 
     cc <- grid.vals[which.min(bfs)]
     sparse.data$prior <- initial.prior+cc
