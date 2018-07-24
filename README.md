@@ -100,9 +100,9 @@ snp.matrix <- load_fasta(fasta.file.name)
 hb.results <- hierBAPS(snp.matrix, max.depth = 2, n.pops = 20, quiet = TRUE)
 
 calc_marginal_llk(sparse.data, hb.results$partition.df$`level 1`)
-#> [1] -49596.48
+#> [1] -49592.83
 calc_marginal_llk(sparse.data, best.partition)
-#> [1] -49503.41
+#> [1] -49499.56
 ```
 
 We can also plot the output of the two algorithms along with a pre-calculated tree using ggtree (Yu et al. 2017).
@@ -130,7 +130,7 @@ We can compare this result to other priors, either flat or the population mean b
 
 ``` r
 sparse.data <- optimise_prior(sparse.data, type = "flat")
-#> [1] "Optimised hyperparameter: 0.2"
+#> [1] "Optimised hyperparameter: 0.02"
 
 baps.hc <- fast_baps(sparse.data)
 #> [1] "Calculating initial clustering..."
@@ -158,7 +158,7 @@ f2
 
 ``` r
 sparse.data <- optimise_prior(sparse.data, type = "hc")
-#> [1] "Optimised hyperparameter: 1.3"
+#> [1] "Optimised hyperparameter: 0.286"
 
 baps.hc <- fast_baps(sparse.data)
 #> [1] "Calculating initial clustering..."
@@ -189,83 +189,6 @@ we can also investigate multiple levels
 ``` r
 sparse.data <- import_fasta_sparse_nt(fasta.file.name, prior = "baps")
 multi <- multi_res_baps(sparse.data)
-#> [1] "Clustering at level 1"
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Clustering at level 2"
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
-#> [1] "Calculating initial clustering..."
-#> [1] "Calculating initial dk values..."
-#> [1] "Clustering using hierarchical Bayesian clustering..."
-#> [1] "Calculating node marginal llks..."
-#> [1] "Finding best partition..."
 
 plot.df <- data.frame(id = colnames(sparse.data$snp.matrix), val = hb.results$partition.df$`level 1`, 
     fastbaps = multi$`Level 1`, fastbaps2 = multi$`Level 2`, stringsAsFactors = FALSE)
@@ -333,7 +256,7 @@ best.partition.ward <- best_baps_partition(sparse.data, h)
 #> [1] "Calculating node marginal llks..."
 #> [1] "Finding best partition..."
 calc_marginal_llk(sparse.data, best.partition.ward)
-#> [1] -49621.05
+#> [1] -49609.02
 ```
 
 References
