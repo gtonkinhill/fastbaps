@@ -8,6 +8,7 @@
 #'
 #' @param fasta.file.name path to the fasta file
 #' @param prior the type of prior to use. Can be one of 'baps' and 'mean' (default=baps)
+#' @param check.fasta whether to check the fasta file for issue. Slows things down a little but may be avoided for very large fasta files.
 #'
 #' @return A sparse matrix reprsentation of the SNPs (different to the consensus sequence)
 #'
@@ -16,12 +17,15 @@
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #'
 #' @export
-import_fasta_sparse_nt <- function(fasta.file.name, prior='baps'){
+import_fasta_sparse_nt <- function(fasta.file.name, prior='baps', check.fasta=TRUE){
 
   # Check inputs
   if(!file.exists(fasta.file.name)) stop(paste("Can't locate file", fasta.file.name))
-  # Cheat a bit by checking the file using ape
-  invisible(capture.output(ape::read.FASTA(fasta.file.name, type = "DNA")))
+  if(!is.logical(check.fasta)) stop("check.fasta should be one of TRUE/FALSE!")
+  if(check.fasta){
+    # Cheat a bit by checking the file using ape
+    invisible(capture.output(ape::read.FASTA(fasta.file.name, type = "DNA")))
+  }
   if(!is.character(prior)) stop("Invalid input for prior parameter!")
   if(!(prior %in% c("baps", "mean"))) stop("Invalid input for prior parameter!")
 

@@ -18,14 +18,14 @@
 #' sparse.data <- optimise_prior(sparse.data)
 #'
 #' @export
-optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "flat", n.cores=1){
+optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symmetric", n.cores=1){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
-  if(!(type %in% c("flat", "hc"))) stop("Invalid value for type. Must be one of 'flat' or 'hc'")
+  if(!(type %in% c("symmetric", "hc", "optimise.baps", "baps", "ref"))) stop("Invalid value for type. Must be one of 'symmetric', 'hc', 'ref' or 'baps'")
   if(!all(grid.interval>0)) stop("grid values must greater than 0")
 
   #create hclust object
@@ -42,12 +42,35 @@ optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "flat"
     initial.prior <- initial.prior + 1
     initial.prior <- t(t(initial.prior)/colSums(initial.prior))
     initial.prior <- ceiling(initial.prior*1000)/1000
-    sparse.data$prior <- initial.prior
-
+  } else if (type=="optimise.baps") {
+    initial.prior <- matrix(c(rep(ncol(sparse.data$snp.matrix), nrow(sparse.data$snp.matrix)),
+                              rowSums(sparse.data$snp.matrix==1),
+                              rowSums(sparse.data$snp.matrix==2),
+                              rowSums(sparse.data$snp.matrix==3),
+                              rowSums(sparse.data$snp.matrix==4)), nrow = 5, byrow = TRUE)
+    initial.prior[1,] <- initial.prior[1,] - colSums(initial.prior[2:5,])
+    initial.prior <- t(t(initial.prior)/colSums(initial.prior))
+    initial.prior <- initial.prior>0
+    initial.prior <- t(t(initial.prior)/colSums(initial.prior))
+  } else if (type=="baps") {
+    initial.prior <- matrix(c(rep(ncol(sparse.data$snp.matrix), nrow(sparse.data$snp.matrix)),
+                              rowSums(sparse.data$snp.matrix==1),
+                              rowSums(sparse.data$snp.matrix==2),
+                              rowSums(sparse.data$snp.matrix==3),
+                              rowSums(sparse.data$snp.matrix==4)), nrow = 5, byrow = TRUE)
+    initial.prior[1,] <- initial.prior[1,] - colSums(initial.prior[2:5,])
+    initial.prior <- t(t(initial.prior)/colSums(initial.prior))
+    initial.prior <- initial.prior>0
+    initial.prior <- t(t(initial.prior)/colSums(initial.prior))
+  } else if (type=="ref") {
+    initial.prior <- matrix(1, nrow = nrow(sparse.data$prior), ncol = ncol(sparse.data$prior))
+    initial.prior[1,] <- 2
   } else {
     initial.prior <- matrix(1, nrow = nrow(sparse.data$prior), ncol = ncol(sparse.data$prior))
-    sparse.data$prior <- initial.prior
   }
+  sparse.data$prior <- initial.prior
+
+  if (type=="baps") return(sparse.data)
 
   opt <- optimise(calc_prior_prob, grid.interval, sparse.data, initial.prior, h, maximum = TRUE, tol=1e-3)
   cc <- round(opt$maximum, digits = 3)
@@ -75,3 +98,5 @@ calc_prior_prob <- function(cc, temp.sparse.data, temp.initial.prior, temp.h){
   prob.tree <- llks$ptree[length(llks$ptree)]
   return(prob.tree)
 }
+
+
