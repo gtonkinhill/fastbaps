@@ -4,13 +4,15 @@
 #' Function to generate hclust object. Uses initial kmeans if dataset is too large.
 #'
 #' @import ape
+#' @import Matrix
 #'
 #' @param sparse.data
 #' @param attribute
+#' @param n.cores
 #'
 #'
 # adpated from ape as.phylo
-get_hclust <- function(sparse.data, quiet){
+get_hclust <- function(sparse.data, quiet, n.cores=1){
 
   MAX_CLUSTER_TO_KMEANS <- 10000
   n.isolates <- ncol(sparse.data$snp.matrix)
@@ -20,38 +22,47 @@ get_hclust <- function(sparse.data, quiet){
     snp.dist <- as.dist((max(snp.dist)-snp.dist)/max(snp.dist))
     h <- stats::hclust(snp.dist, method = "ward.D2")
   } else {
+    # if(!quiet){
+    #   print("Large number of sequences so doing an initial split using kmeans...")
+    # }
+    # #as we are only interested in the lower branches of the dendrogram we can take advantage of a fast
+    # #algorithm like kmeans to reduce the complexity of the problem
+    # pc <- irlba::prcomp_irlba(1*t(sparse.data$snp.matrix>0), n=50)
+    # k.n.clusters <- 100 #clusters of approximately 1%
+    # k <- kmeans(pc$x, centers = k.n.clusters, iter.max = 50, nstart = 5)$cluster
+    # while(max(table(k))>MAX_CLUSTER_TO_KMEANS){
+    #   k.n.clusters <- k.n.clusters*2
+    #   k <- kmeans(pc$x, centers = k.n.clusters, iter.max = 50, nstart = 5)$cluster
+    # }
+    #
+    # hclist <- lapply(split(1:n.isolates, k), function(k.part){
+    #   snp.dist <- as.matrix(tcrossprod(t(sparse.data$snp.matrix[,k.part]>0)))
+    #   snp.dist <- as.dist((max(snp.dist)-snp.dist)/max(snp.dist))
+    #   ht <- hclust(snp.dist, method = "ward.D2")
+    #   ht$height <- round(ht$height, 6) #to stop us running into precision issues
+    #   return(ht)
+    # })
+    # h <- merge_hclust(hclist)
     if(!quiet){
-      print("Large number of sequences so doing an initial split using kmeans...")
+      print("Large number of sequences so using an initial PCA and fastcluster. This will be swapped to a HDBSCAN hierarchy at some point.")
     }
-    #as we are only interested in the lowere branches of the dendrogram we can take advatange of a fast
-    #algorithm like kmeans to reduce the complexity of the problem
     pc <- irlba::prcomp_irlba(1*t(sparse.data$snp.matrix>0), n=50)
-    k.n.clusters <- ceiling(n.isolates/MAX_CLUSTER_TO_KMEANS)
-    k <- kmeans(pc$x, centers = k.n.clusters, iter.max = 50, nstart = 5)$cluster
-    while(max(table(k))>MAX_CLUSTER_TO_KMEANS){
-      k.n.clusters <- k.n.clusters*2
-      k <- kmeans(pc$x, centers = k.n.clusters, iter.max = 50, nstart = 5)$cluster
-    }
+    h <- fastcluster::hclust(parallelDist::parallelDist(pc$x, method="euclidean", threads=n.cores),
+                             method="ward.D2")
+    h$labels <- colnames(sparse.data$snp.matrix)
+    gc()
 
-    hclist <- lapply(split(1:n.isolates, k), function(k.part){
-      snp.dist <- as.matrix(tcrossprod(t(sparse.data$snp.matrix[,k.part]>0)))
-      snp.dist <- as.dist((max(snp.dist)-snp.dist)/max(snp.dist))
-      ht <- hclust(snp.dist, method = "ward.D2")
-      ht$height <- round(ht$height, 6) #to stop us running into precision issues
-      return(ht)
-    })
-    h <- merge_hclust(hclist)
   }
   return(h)
 
 }
 
 
-merge_hclust <- function(hclist) {
-  d <- as.dendrogram(hclist[[1]])
-  for (i in 2:length(hclist)) {
-    # print(i)
-    d <- merge(d, as.dendrogram(hclist[[i]]))
-  }
-  as.hclust(d)
-}
+# merge_hclust <- function(hclist) {
+#   d <- as.dendrogram(hclist[[1]])
+#   for (i in 2:length(hclist)) {
+#     # print(i)
+#     d <- merge(d, as.dendrogram(hclist[[i]]))
+#   }
+#   as.hclust(d)
+# }

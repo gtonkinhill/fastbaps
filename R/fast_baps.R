@@ -51,7 +51,12 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1, quiet=FALSE){
     initial.partition <- as.list(1:n.isolates)
     dk.initial <- rep(0, n.isolates)
   } else {
-    h <- get_hclust(sparse.data, quiet)
+    if(is.null(sparse.data$hclust)){
+      h <- get_hclust(sparse.data, quiet, n.cores)
+    } else {
+      h <- sparse.data$hclust
+    }
+
     if(!quiet){
       print("Calculating initial dk values...")
     }

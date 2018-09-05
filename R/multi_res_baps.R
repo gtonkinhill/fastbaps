@@ -18,8 +18,6 @@
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' multi.res.df <- multi_res_baps(sparse.data, levels=2)
 #'
-#'
-#'
 #' @export
 multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1, quiet=TRUE){
 
@@ -57,6 +55,8 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1, quiet=
         temp.data$snp.matrix <- temp.data$snp.matrix[keep, , drop=FALSE]
         temp.data$prior <- temp.data$prior[, keep, drop=FALSE]
         temp.data$consensus <- temp.data$consensus[keep]
+        temp.data$hclust <- NULL
+
         if((l==1) && !is.null(k.init)){
           fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = k.init, quiet = quiet)
         } else {

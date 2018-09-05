@@ -29,7 +29,7 @@ optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symme
   if(!all(grid.interval>0)) stop("grid values must greater than 0")
 
   #create hclust object
-  h <- get_hclust(sparse.data, TRUE)
+  h <- get_hclust(sparse.data, TRUE, n.cores)
 
   if(type=="hc"){
     #initialise prior
@@ -86,6 +86,8 @@ optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symme
   print(paste("Optimised hyperparameter:", cc))
 
   sparse.data$prior.type = "optimised"
+
+  sparse.data$hclust <- h
 
   return(sparse.data)
 }
