@@ -16,8 +16,7 @@ Imports:
     phytools,
     irlba,
     parallel,
-    fastcluster,
-    parallelDist
+    genie
 Suggests: knitr,
     rmarkdown,
     ggtree,
