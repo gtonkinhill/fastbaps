@@ -29,7 +29,7 @@ List calc_ddk(List data, arma::imat merges) {
   // initilise first n_isolate elements of arrays
   for(i=0; i<n_isolates; i++){
     clust_size(i) = 1;
-    dk[i] = 0.0;
+    dk[i] = log(1);
   }
 
   for(m=0; m<n_merges; m++){

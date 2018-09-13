@@ -14,7 +14,7 @@
 # adpated from ape as.phylo
 get_hclust <- function(sparse.data, quiet, n.cores=1){
 
-  MAX_CLUSTER_TO_KMEANS <- 100
+  MAX_CLUSTER_TO_KMEANS <- 10000
   n.isolates <- ncol(sparse.data$snp.matrix)
 
   if(n.isolates<MAX_CLUSTER_TO_KMEANS){
@@ -26,7 +26,7 @@ get_hclust <- function(sparse.data, quiet, n.cores=1){
       print("Large number of sequences so using an initial PCA and the genie hierarchical clustering algorithm.")
     }
     pc <- irlba::prcomp_irlba(1*t(sparse.data$snp.matrix>0), n=50)
-    h <- genie::hclust2(d="euclidean", objects = pc$x, useVpTree=FALSE, thresholdGini = 1)
+    h <- genie::hclust2(d="euclidean", objects = pc$x, useVpTree=FALSE, thresholdGini = 0.2)
     h$labels <- colnames(sparse.data$snp.matrix)
     gc()
 
