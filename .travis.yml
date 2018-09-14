@@ -25,6 +25,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
+            - gcc-4.9
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
