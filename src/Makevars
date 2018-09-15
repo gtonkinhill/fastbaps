@@ -1,7 +1,4 @@
-PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) 
-# 1.2.4 Using C++11 code
-CXX_STD = CXX11
-
-# Besides of the -fopenmp flag, here I'm telling armadillo to use
-# 64BIT_WORD which removes the matrix size limit constraint.
-PKG_CXXFLAGS= -DARMA_64BIT_WORD
+PKG_CFLAGS = $(SHLIB_OPENMP_CFLAGS)
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_64BIT_WORD=1
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) $(SHLIB_OPENMP_CXXFLAGS)
+PKG_CPPFLAGS =	-I../inst/include/
