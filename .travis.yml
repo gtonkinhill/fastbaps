@@ -9,31 +9,22 @@ warnings_are_errors: false
 
 sudo: required
 
-before_install: sudo apt-get install libgmp3-dev
-
 notifications:
     slack: pathogens:8NUkMUXlMNecj9NXnwTKbBQU
 
 
-matrix:
-  include:
-    # works on Precise and Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-8
-            - gcc-4.9
-      env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.9
+      - g++-4.9
 
 before_install: |
+  sudo apt-get install libgmp3-dev
   mkdir ~/.R
   cat <<EOF > ~/.R/Makevars
   CXX1X=g++-4.9
   CXX1XSTD=-std=c++11
 
-before_install:
-    - eval "${MATRIX_EVAL}"
