@@ -36,6 +36,7 @@ matrix:
 before_install:
   - eval "${MATRIX_EVAL}"
   - sudo apt-get install libgmp3-dev
+  - sudo apt-get install gfortran
   # Link gcc-6 and g++-6 to their standard commands
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
