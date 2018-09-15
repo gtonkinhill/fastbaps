@@ -40,6 +40,8 @@ before_install:
   # Link gcc-6 and g++-6 to their standard commands
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
+  - sudo ln -s /usr/lib/x86_64-linux-gnu/libgfortran.so.3 /usr/lib/libgfortran.so
+  - sudo ln -s /usr/lib/x86_64-linux-gnu/libquadmath.so.0 /usr/lib/libquadmath.so
   # Export CC and CXX to tell cmake which compiler to use
   - export CC=/usr/bin/gcc-7
   - export CXX=/usr/bin/g++-7
