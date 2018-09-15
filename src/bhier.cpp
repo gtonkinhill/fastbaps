@@ -1,8 +1,10 @@
+#define ARMA_64BIT_WORD 1
 #include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
+
 #include "log_add_sub.hpp"
 #include <math.h>
-
-// [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace Rcpp;
 using namespace std;
