@@ -45,7 +45,7 @@ before_install:
   # Check versions of gcc, g++ and cmake
   - gcc -v && g++ -v && cmake --version
   - mkdir -p ~/.R
-  - VER=-7
+  - echo "VER=-7" >> ~/.R/Makevars
   - echo "CC=gcc$(VER) -std=gnu99" >> ~/.R/Makevars
   - echo "CXX=g++$(VER)"           >> ~/.R/Makevars
   - echo 'CXX1X=$(CXX)'            >> ~/.R/Makevars
