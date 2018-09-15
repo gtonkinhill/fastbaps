@@ -17,8 +17,6 @@ sudo: required
 notifications:
     slack: pathogens:8NUkMUXlMNecj9NXnwTKbBQU
 
-
-
 matrix:
   include:
     # works on Precise and Trusty
@@ -36,9 +34,7 @@ matrix:
 
 
 before_install:
-    - eval "${MATRIX_EVAL}"
-
-before_install:
+  - eval "${MATRIX_EVAL}"
   - sudo apt-get install libgmp3-dev
   # Link gcc-6 and g++-6 to their standard commands
   - ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
@@ -48,9 +44,6 @@ before_install:
   - export CXX=/usr/bin/g++-7
   # Check versions of gcc, g++ and cmake
   - gcc -v && g++ -v && cmake --version
-
-# Specify local Makevars configuration
-before_install:
   - mkdir -p ~/.R
   - VER=-7
   - echo "CC=gcc$(VER) -std=gnu99" >> ~/.R/Makevars
