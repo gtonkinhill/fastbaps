@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
 
 #include "log_add_sub.hpp"
 #include <math.h>

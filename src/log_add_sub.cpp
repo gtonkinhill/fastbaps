@@ -2,6 +2,8 @@
 #include <iostream>
 #include <Rcpp.h>
 
+// [[Rcpp::plugins(cpp11)]]
+
 using namespace Rcpp;
 using namespace std;
 

@@ -1,10 +1,10 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
 
 #include <math.h>
 #include "log_add_sub.hpp"
 
-// [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace Rcpp;
 using namespace std;
