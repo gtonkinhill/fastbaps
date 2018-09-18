@@ -2,12 +2,10 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 
-#include <math.h>
+#include <cmath>
 #include "log_add_sub.hpp"
 
-
 using namespace Rcpp;
-using namespace std;
 
 // [[Rcpp::export]]
 List tree_llk(List data, arma::imat merges) {

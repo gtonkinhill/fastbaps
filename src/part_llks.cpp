@@ -2,12 +2,8 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 
-
-#include <math.h>
-
-
+#include <cmath>
 using namespace Rcpp;
-using namespace std;
 
 // [[Rcpp::export]]
 List part_llks(List data, List partitions) {

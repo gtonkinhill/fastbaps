@@ -1,15 +1,14 @@
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <Rcpp.h>
 
 // [[Rcpp::plugins(cpp11)]]
 
 using namespace Rcpp;
-using namespace std;
 
 double log_sum_exp(double u, double v)
 {
-  if(isinf(u) && isinf(v)){
+  if(std::isinf(u) && std::isinf(v)){
     return(-std::numeric_limits<double>::infinity());
   }
   return(std::max(u, v) + log(exp(u - std::max(u, v)) + exp(v - std::max(u, v))));

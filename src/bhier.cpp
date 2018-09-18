@@ -4,10 +4,9 @@
 
 
 #include "log_add_sub.hpp"
-#include <math.h>
+#include <cmath>
 
 using namespace Rcpp;
-using namespace std;
 
 // [[Rcpp::export]]
 List bhier(List data, List partitions, NumericVector d_k) {

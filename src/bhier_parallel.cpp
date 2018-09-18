@@ -3,13 +3,12 @@
 // [[Rcpp::plugins(cpp11)]]
 
 #include "log_add_sub.hpp"
-#include <math.h>
+#include <cmath>
 #include <omp.h>
 void omp_set_num_threads(int num_threads);
 int omp_get_num_threads();
 
 using namespace Rcpp;
-using namespace std;
 
 // [[Rcpp::plugins(openmp)]]
 
