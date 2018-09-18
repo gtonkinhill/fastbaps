@@ -8,6 +8,13 @@ warnings_are_errors: false
 
 sudo: required
 
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - lcov
+
 before_install: sudo apt-get install libgmp3-dev
 
 notifications:
