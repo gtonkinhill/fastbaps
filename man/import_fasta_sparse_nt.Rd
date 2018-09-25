@@ -4,10 +4,10 @@
 \alias{import_fasta_sparse_nt}
 \title{import_fasta_sparse_nt}
 \usage{
-import_fasta_sparse_nt(fasta.file.name, prior = "baps", check.fasta = TRUE)
+import_fasta_sparse_nt(fasta, prior = "baps", check.fasta = TRUE)
 }
 \arguments{
-\item{fasta.file.name}{path to the fasta file}
+\item{fasta}{path to the fasta file or an ape DNAbin object}
 
 \item{prior}{the type of prior to use. Can be one of 'baps' and 'mean' (default=baps)}
 
@@ -20,7 +20,8 @@ A sparse matrix reprsentation of the SNPs (different to the consensus sequence)
 Imports a fasta file to a sparse matrix representing SNPs from the consensus
 }
 \examples{
-fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
-sparse.data <- import_fasta_sparse_nt(fasta.file.name)
+fasta <- system.file("extdata", "seqs.fa", package = "fastbaps")
+fasta <- ape::read.FASTA(fasta)
+sparse.data <- import_fasta_sparse_nt(fasta)
 
 }

@@ -2,15 +2,16 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 
-#include "log_add_sub.hpp"
-#include <cmath>
 #include <omp.h>
 void omp_set_num_threads(int num_threads);
 int omp_get_num_threads();
+// [[Rcpp::plugins(openmp)]]
 
 using namespace Rcpp;
+using namespace std;
 
-// [[Rcpp::plugins(openmp)]]
+#include "log_add_sub.hpp"
+#include <cmath>
 
 // [[Rcpp::export]]
 List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) {
@@ -88,34 +89,34 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
 
 
   // Calculate the llk of each partition
-  #pragma omp parallel shared(term1, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index, p_tree, partition_sizes) default(none)
-  {
-    unsigned int pp, k, partition_length_temp;
-    int consensus_counts_temp[n_snps];
-    #pragma omp for
-    for(pp=0; pp<n_partitions; pp++){
-      partition_length_temp = partition_sizes[pp];
-      std::fill(consensus_counts_temp, consensus_counts_temp + n_snps, partition_length_temp);
+#pragma omp parallel shared(term1, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index, p_tree, partition_sizes) default(none)
+{
+  unsigned int pp, k, partition_length_temp;
+  int consensus_counts_temp[n_snps];
+#pragma omp for
+  for(pp=0; pp<n_partitions; pp++){
+    partition_length_temp = partition_sizes[pp];
+    std::fill(consensus_counts_temp, consensus_counts_temp + n_snps, partition_length_temp);
 
-      p_tree(pp) = term1(partition_length_temp);
+    p_tree(pp) = term1(partition_length_temp);
 
-      for (arma::sp_umat::const_iterator it = sp_partition_counts[pp].begin(); it != sp_partition_counts[pp].end(); ++it) {
-        consensus_counts_temp[it.row()] -= *it;
-        p_tree(pp) += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
-      }
-      for(k=0; k<n_snps; k++){
-        p_tree(pp) += pre_lgamma(consensus_counts_temp[k], prior_index(0, k))-pre_lgamma(0, prior_index(0, k));
-      }
-      initial_partition_llk(pp) = p_tree(pp);
+    for (arma::sp_umat::const_iterator it = sp_partition_counts[pp].begin(); it != sp_partition_counts[pp].end(); ++it) {
+      consensus_counts_temp[it.row()] -= *it;
+      p_tree(pp) += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
     }
+    for(k=0; k<n_snps; k++){
+      p_tree(pp) += pre_lgamma(consensus_counts_temp[k], prior_index(0, k))-pre_lgamma(0, prior_index(0, k));
+    }
+    initial_partition_llk(pp) = p_tree(pp);
   }
+}
 
-  // For each pair of partitions calculate the posterior probability of combining them.
-  #pragma omp parallel shared(mllk, term1, sp_partition_counts, rk, pre_lgamma, prior_index, p_tree, d_k)
-  {
+// For each pair of partitions calculate the posterior probability of combining them.
+#pragma omp parallel shared(mllk, term1, sp_partition_counts, rk, pre_lgamma, prior_index, p_tree, d_k)
+{
   unsigned int pp1, pp2, k, partition_length_temp;
   int consensus_counts_temp[n_snps];
-  #pragma omp for
+#pragma omp for
   for(pp1=0; pp1<n_partitions; pp1++){
     for(pp2=(pp1+1); pp2<n_partitions; pp2++){
       arma::sp_umat res = sp_partition_counts[pp1] + sp_partition_counts[pp2];
@@ -140,104 +141,104 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
       rk(pp2,pp1) = rk(pp1,pp2);
     }
   }
+}
+
+// Iteratively cluster the closest two clusters by mllk
+IntegerVector group_mems = -seq_len(n_partitions); // Tracks group membership
+NumericMatrix edges((n_partitions-1), 2);
+NumericVector heights((n_partitions-1), 0.0); //hclust height output
+NumericVector rk_vec((n_partitions-1), 0.0);
+arma::umat used = arma::zeros<arma::umat>(n_partitions); //already clustered
+NumericVector neg_inf_llk_vec(n_partitions, -std::numeric_limits<double>::infinity());
+int row_index, col_index, max_i, min_i;
+double temp_max;
+
+for(j=0; j<(n_partitions-1); j++) {
+  // Find max mllk and corresponding indices
+  temp_max = -std::numeric_limits<double>::infinity();
+  for(p1=0; p1<n_partitions; p1++){
+    for(p2=(p1+1); p2<n_partitions; p2++){
+      if(temp_max < rk(p1,p2)){
+        temp_max = rk(p1,p2);
+        row_index = p1;
+        col_index = p2;
+      }
+    }
   }
 
-  // Iteratively cluster the closest two clusters by mllk
-  IntegerVector group_mems = -seq_len(n_partitions); // Tracks group membership
-  NumericMatrix edges((n_partitions-1), 2);
-  NumericVector heights((n_partitions-1), 0.0); //hclust height output
-  NumericVector rk_vec((n_partitions-1), 0.0);
-  arma::umat used = arma::zeros<arma::umat>(n_partitions); //already clustered
-  NumericVector neg_inf_llk_vec(n_partitions, -std::numeric_limits<double>::infinity());
-  int row_index, col_index, max_i, min_i;
-  double temp_max;
+  if(row_index > col_index){
+    max_i = row_index;
+    min_i = col_index;
+  } else {
+    max_i = col_index;
+    min_i = row_index;
+  }
 
-  for(j=0; j<(n_partitions-1); j++) {
-    // Find max mllk and corresponding indices
-    temp_max = -std::numeric_limits<double>::infinity();
-    for(p1=0; p1<n_partitions; p1++){
-      for(p2=(p1+1); p2<n_partitions; p2++){
-        if(temp_max < rk(p1,p2)){
-          temp_max = rk(p1,p2);
-          row_index = p1;
-          col_index = p2;
-        }
-      }
-    }
+  edges(j,0) = group_mems[min_i];
+  edges(j,1) = group_mems[max_i];
 
-    if(row_index > col_index){
-      max_i = row_index;
-      min_i = col_index;
-    } else {
-      max_i = col_index;
-      min_i = row_index;
-    }
+  heights[j] = mllk(row_index,col_index);
+  rk_vec[j] = rk(row_index,col_index);
 
-    edges(j,0) = group_mems[min_i];
-    edges(j,1) = group_mems[max_i];
+  group_mems[min_i] = j+1;
 
-    heights[j] = mllk(row_index,col_index);
-    rk_vec[j] = rk(row_index,col_index);
+  // Add clusters that we have merged and update partition sizes
+  sp_partition_counts[min_i] = sp_partition_counts[min_i] + sp_partition_counts[max_i];
+  partition_sizes[min_i] = partition_sizes[min_i] + partition_sizes[max_i];
+  d_k_t = log_sum_exp(pre_lgamma(partition_sizes[min_i], 0), d_k(min_i) + d_k(max_i));
+  p_tree(min_i) = log_sum_exp(pre_lgamma(partition_sizes[min_i], 0) + mllk(min_i, max_i) - d_k_t,
+         d_k(min_i) + d_k(max_i) + p_tree(min_i) + p_tree(max_i) - d_k_t);
+  d_k(min_i) = d_k_t;
 
-    group_mems[min_i] = j+1;
+  // Add max_i index to list of clusters we no longer need
+  used[max_i] = 1;
 
-    // Add clusters that we have merged and update partition sizes
-    sp_partition_counts[min_i] = sp_partition_counts[min_i] + sp_partition_counts[max_i];
-    partition_sizes[min_i] = partition_sizes[min_i] + partition_sizes[max_i];
-    d_k_t = log_sum_exp(pre_lgamma(partition_sizes[min_i], 0), d_k(min_i) + d_k(max_i));
-    p_tree(min_i) = log_sum_exp(pre_lgamma(partition_sizes[min_i], 0) + mllk(min_i, max_i) - d_k_t,
-           d_k(min_i) + d_k(max_i) + p_tree(min_i) + p_tree(max_i) - d_k_t);
-    d_k(min_i) = d_k_t;
+  // update rk matrix
+  partition_sizes[max_i] = -std::numeric_limits<int>::infinity();
+  for(p1=0; p1<n_partitions; p1++){
+    mllk(p1, max_i) = -std::numeric_limits<double>::infinity();
+    mllk(max_i, p1) = -std::numeric_limits<double>::infinity();
+    rk(p1, max_i) = -std::numeric_limits<double>::infinity();
+    rk(max_i, p1) = -std::numeric_limits<double>::infinity();
+  }
 
-    // Add max_i index to list of clusters we no longer need
-    used[max_i] = 1;
+#pragma omp parallel shared(used, term1, mllk, rk, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index,d_k, p_tree) firstprivate(min_i)
+{
+  unsigned int pp, k, partition_length_temp;
+  int consensus_counts_temp[n_snps];
+#pragma omp for
+  for(pp=0; pp<n_partitions; pp++){
+    if((used[pp]!=1) && (pp!=min_i)){
 
-    // update rk matrix
-    partition_sizes[max_i] = -std::numeric_limits<int>::infinity();
-    for(p1=0; p1<n_partitions; p1++){
-      mllk(p1, max_i) = -std::numeric_limits<double>::infinity();
-      mllk(max_i, p1) = -std::numeric_limits<double>::infinity();
-      rk(p1, max_i) = -std::numeric_limits<double>::infinity();
-      rk(max_i, p1) = -std::numeric_limits<double>::infinity();
-    }
+      arma::sp_umat res = sp_partition_counts[pp] + sp_partition_counts[min_i];
+      partition_length_temp = partition_sizes[pp]+partition_sizes[min_i];
+      std::fill(consensus_counts_temp, consensus_counts_temp + n_snps, partition_length_temp);
 
-    #pragma omp parallel shared(used, term1, mllk, rk, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index,d_k, p_tree) firstprivate(min_i)
-    {
-    unsigned int pp, k, partition_length_temp;
-    int consensus_counts_temp[n_snps];
-    #pragma omp for
-    for(pp=0; pp<n_partitions; pp++){
-      if((used[pp]!=1) && (pp!=min_i)){
+      mllk(min_i,pp) = term1(partition_length_temp);
 
-        arma::sp_umat res = sp_partition_counts[pp] + sp_partition_counts[min_i];
-        partition_length_temp = partition_sizes[pp]+partition_sizes[min_i];
-        std::fill(consensus_counts_temp, consensus_counts_temp + n_snps, partition_length_temp);
-
-        mllk(min_i,pp) = term1(partition_length_temp);
-
-        for (arma::sp_umat::const_iterator it = res.begin(); it != res.end(); ++it) {
-          consensus_counts_temp[it.row()] -= *it;
-          mllk(min_i,pp)  += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
-        }
-
-        for(k=0; k<n_snps; k++){
-          mllk(min_i,pp)  += pre_lgamma(consensus_counts_temp[k], prior_index(0, k))-pre_lgamma(0, prior_index(0, k));
-        }
-
-        mllk(pp,min_i) = mllk(min_i,pp);
-
-        rk(pp,min_i) = mllk(min_i,pp) - p_tree(min_i) - p_tree(pp) + pre_lgamma(partition_length_temp, 0) - d_k(min_i) - d_k(pp);
-        rk(min_i,pp) = rk(pp,min_i);
+      for (arma::sp_umat::const_iterator it = res.begin(); it != res.end(); ++it) {
+        consensus_counts_temp[it.row()] -= *it;
+        mllk(min_i,pp)  += pre_lgamma(*it, prior_index(1+it.col(), it.row()))-pre_lgamma(0, prior_index(1+it.col(), it.row()));
       }
 
-    }
+      for(k=0; k<n_snps; k++){
+        mllk(min_i,pp)  += pre_lgamma(consensus_counts_temp[k], prior_index(0, k))-pre_lgamma(0, prior_index(0, k));
+      }
+
+      mllk(pp,min_i) = mllk(min_i,pp);
+
+      rk(pp,min_i) = mllk(min_i,pp) - p_tree(min_i) - p_tree(pp) + pre_lgamma(partition_length_temp, 0) - d_k(min_i) - d_k(pp);
+      rk(min_i,pp) = rk(pp,min_i);
     }
 
   }
+}
 
-  return(List::create(Named("initial_partition_llk") = initial_partition_llk,
-                      Named("edges") = edges,
-                      Named("heights")= heights,
-                      Named("rk")=rk_vec));
+}
+
+return(List::create(Named("initial_partition_llk") = initial_partition_llk,
+                    Named("edges") = edges,
+                    Named("heights")= heights,
+                    Named("rk")=rk_vec));
 
 }
