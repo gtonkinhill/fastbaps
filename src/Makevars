@@ -5,7 +5,6 @@ CXX1X=$(shell ${R_HOME}/bin/R CMD config CXX11)
 ifeq ($(shell $(CXX1X) -fopenmp -E -xc++ - 2>&1 >/dev/null && echo 'true'), true)
   PKG_CFLAGS=$(SHLIB_OPENMP_CFLAGS)
   PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS) -DARMA_64BIT_WORD -O3
-  PKG_LIBS = -lprofiler
 else
   PKG_CXXFLAGS=-DARMA_64BIT_WORD -O3
 endif

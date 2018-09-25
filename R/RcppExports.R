@@ -21,14 +21,6 @@ part_llks <- function(data, partitions) {
     .Call('_fastbaps_part_llks', PACKAGE = 'fastbaps', data, partitions)
 }
 
-start_profiler <- function(str) {
-    .Call('_fastbaps_start_profiler', PACKAGE = 'fastbaps', str)
-}
-
-stop_profiler <- function() {
-    .Call('_fastbaps_stop_profiler', PACKAGE = 'fastbaps')
-}
-
 tree_llk <- function(data, merges) {
     .Call('_fastbaps_tree_llk', PACKAGE = 'fastbaps', data, merges)
 }

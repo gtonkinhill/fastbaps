@@ -68,27 +68,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// start_profiler
-SEXP start_profiler(SEXP str);
-RcppExport SEXP _fastbaps_start_profiler(SEXP strSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type str(strSEXP);
-    rcpp_result_gen = Rcpp::wrap(start_profiler(str));
-    return rcpp_result_gen;
-END_RCPP
-}
-// stop_profiler
-SEXP stop_profiler();
-RcppExport SEXP _fastbaps_stop_profiler() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(stop_profiler());
-    return rcpp_result_gen;
-END_RCPP
-}
 // tree_llk
 List tree_llk(List data, arma::imat merges);
 RcppExport SEXP _fastbaps_tree_llk(SEXP dataSEXP, SEXP mergesSEXP) {
@@ -108,8 +87,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fastbaps_calc_ddk", (DL_FUNC) &_fastbaps_calc_ddk, 2},
     {"_fastbaps_import_fasta_to_vector_each_nt", (DL_FUNC) &_fastbaps_import_fasta_to_vector_each_nt, 1},
     {"_fastbaps_part_llks", (DL_FUNC) &_fastbaps_part_llks, 2},
-    {"_fastbaps_start_profiler", (DL_FUNC) &_fastbaps_start_profiler, 1},
-    {"_fastbaps_stop_profiler", (DL_FUNC) &_fastbaps_stop_profiler, 0},
     {"_fastbaps_tree_llk", (DL_FUNC) &_fastbaps_tree_llk, 2},
     {NULL, NULL, 0}
 };
