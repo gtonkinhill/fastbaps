@@ -3,9 +3,16 @@
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::plugins(openmp)]]
 
-#include <omp.h>
-void omp_set_num_threads(int num_threads);
-int omp_get_num_threads();
+#ifdef _OPENMP
+  #include <omp.h>
+  void omp_set_num_threads(int num_threads);
+  int omp_get_num_threads();
+#else
+  void omp_set_num_threads(int num_threads);
+  #define omp_get_num_threads() 0
+#endif
+
+
 
 
 using namespace Rcpp;
