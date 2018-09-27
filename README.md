@@ -12,7 +12,7 @@ Installation
 ``` r
 install.packages("devtools")
 
-devtools::install_github("gtonkinhill/fastbaps", auth_token = "37064ad364627e23377a492cf790285642256a23")
+devtools::install_github("gtonkinhill/fastbaps")
 ```
 
 If you would like to also build the vignette with your installation run:
