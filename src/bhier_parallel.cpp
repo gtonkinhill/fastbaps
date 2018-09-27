@@ -1,19 +1,13 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
-// [[Rcpp::plugins(openmp)]]
 
 #ifdef _OPENMP
   #include <omp.h>
   void omp_set_num_threads(int num_threads);
   int omp_get_num_threads();
-#else
-  void omp_set_num_threads(int num_threads);
-  #define omp_get_num_threads() 0
 #endif
-
-
-
+// [[Rcpp::plugins(openmp)]]
 
 using namespace Rcpp;
 using namespace std;
@@ -23,7 +17,10 @@ using namespace std;
 
 // [[Rcpp::export]]
 List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) {
+
+  #ifdef _OPENMP
   omp_set_num_threads(n_cores);
+  #endif
 
   const arma::sp_mat& snp_matrix = data[0];
 
