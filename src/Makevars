@@ -1,3 +1,4 @@
+CXX_STD=CXX11
 
 CXX1X=$(shell ${R_HOME}/bin/R CMD config CXX11)
 
