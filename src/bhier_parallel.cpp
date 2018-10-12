@@ -1,4 +1,4 @@
-#include <chrono>  // for high_resolution_clock
+// #include <chrono>  // for high_resolution_clock
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
@@ -48,7 +48,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
 
   // Pre-compute lgamma values up to three decimal places for each possible count lgamma(x+decimal)
 
-  auto start = std::chrono::high_resolution_clock::now();
+  // auto start = std::chrono::high_resolution_clock::now();
 
   int lg_size = ceil(max(prior)*1000)+3;
   arma::dmat pre_lgamma = arma::dmat(n_isolates+2, lg_size);
@@ -78,10 +78,10 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
     }
   }
 
-  auto finish = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed = finish - start;
-  std::cout << "Start up time: " << elapsed.count() << " s\n";
-  start = std::chrono::high_resolution_clock::now();
+  // auto finish = std::chrono::high_resolution_clock::now();
+  // std::chrono::duration<double> elapsed = finish - start;
+  // std::cout << "Start up time: " << elapsed.count() << " s\n";
+  // start = std::chrono::high_resolution_clock::now();
 
 
   // Count initial alleles for each partition into sparse matrices.
@@ -125,10 +125,10 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   }
 }
 
-finish = std::chrono::high_resolution_clock::now();
-elapsed = finish - start;
-std::cout << "Allocate matrices time: " << elapsed.count() << " s\n";
-start = std::chrono::high_resolution_clock::now();
+// finish = std::chrono::high_resolution_clock::now();
+// elapsed = finish - start;
+// std::cout << "Allocate matrices time: " << elapsed.count() << " s\n";
+// start = std::chrono::high_resolution_clock::now();
 
 // For each pair of partitions calculate the posterior probability of combining them.
 #pragma omp parallel shared(mllk, term1, sp_partition_counts, rk, pre_lgamma, prior_index, p_tree, d_k)
@@ -162,10 +162,10 @@ start = std::chrono::high_resolution_clock::now();
   }
 }
 
-finish = std::chrono::high_resolution_clock::now();
-elapsed = finish - start;
-std::cout << "Initial all v all calc: " << elapsed.count() << " s\n";
-start = std::chrono::high_resolution_clock::now();
+// finish = std::chrono::high_resolution_clock::now();
+// elapsed = finish - start;
+// std::cout << "Initial all v all calc: " << elapsed.count() << " s\n";
+// start = std::chrono::high_resolution_clock::now();
 
 // Iteratively cluster the closest two clusters by mllk
 IntegerVector group_mems = -seq_len(n_partitions); // Tracks group membership
@@ -177,28 +177,13 @@ NumericVector neg_inf_llk_vec(n_partitions, -std::numeric_limits<double>::infini
 int row_index, col_index, max_i, min_i, temp_max;
 
 for(j=0; j<(n_partitions-1); j++) {
-  // Find max mllk and corresponding indices
-  // temp_max = -std::numeric_limits<double>::infinity();
-  // for(p1=0; p1<n_partitions; p1++){
-  //   for(p2=(p1+1); p2<n_partitions; p2++){
-  //     if(temp_max < rk(p1,p2)){
-  //       temp_max = rk(p1,p2);
-  //       row_index = p1;
-  //       col_index = p2;
-  //     }
-  //   }
-  // }
+  // Find max rk and corresponding indices
   temp_max = rk.index_max();
   col_index = temp_max / n_partitions;
   row_index = temp_max % n_partitions;
 
-  if(row_index > col_index){
-    max_i = row_index;
-    min_i = col_index;
-  } else {
-    max_i = col_index;
-    min_i = row_index;
-  }
+  max_i = max(row_index, col_index);
+  min_i = min(row_index, col_index);
 
   edges(j,0) = group_mems[min_i];
   edges(j,1) = group_mems[max_i];
@@ -208,7 +193,7 @@ for(j=0; j<(n_partitions-1); j++) {
 
   group_mems[min_i] = j+1;
 
-  // Add clusters that we have merged and update partition sizes
+  // Add clusters that we have merged and update partition sizes (these logspace additions are a bit slow...)
   sp_partition_counts[min_i] = sp_partition_counts[min_i] + sp_partition_counts[max_i];
   partition_sizes[min_i] = partition_sizes[min_i] + partition_sizes[max_i];
   d_k_t = log_sum_exp(pre_lgamma(partition_sizes[min_i], 0), d_k(min_i) + d_k(max_i));
@@ -218,15 +203,8 @@ for(j=0; j<(n_partitions-1); j++) {
 
   // Add max_i index to list of clusters we no longer need
   used[max_i] = 1;
-
-  // update rk matrix
-  partition_sizes[max_i] = -std::numeric_limits<int>::infinity();
-  for(p1=0; p1<n_partitions; p1++){
-    mllk(p1, max_i) = -std::numeric_limits<double>::infinity();
-    mllk(max_i, p1) = -std::numeric_limits<double>::infinity();
-    rk(p1, max_i) = -std::numeric_limits<double>::infinity();
-    rk(max_i, p1) = -std::numeric_limits<double>::infinity();
-  }
+  rk.row(max_i).fill(-std::numeric_limits<double>::infinity());
+  rk.col(max_i).fill(-std::numeric_limits<double>::infinity());
 
 #pragma omp parallel shared(used, term1, mllk, rk, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index,d_k, p_tree) firstprivate(min_i)
 {
@@ -262,10 +240,10 @@ for(j=0; j<(n_partitions-1); j++) {
 
 }
 
-finish = std::chrono::high_resolution_clock::now();
-elapsed = finish - start;
-std::cout << "Final hierarchical part: " << elapsed.count() << " s\n";
-start = std::chrono::high_resolution_clock::now();
+// finish = std::chrono::high_resolution_clock::now();
+// elapsed = finish - start;
+// std::cout << "Final hierarchical part: " << elapsed.count() << " s\n";
+// start = std::chrono::high_resolution_clock::now();
 
 return(List::create(Named("initial_partition_llk") = initial_partition_llk,
                     Named("edges") = edges,
