@@ -8,6 +8,7 @@
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param grid.interval the upper and lower bound for the hyperparameter to optimise over (default=c(5e-4, 10))
 #' @param type one of "flat" or "hc" indicating a flat prior or the approach of Heller et al.
+#' @param hc.method the type of initial hierarchical clustering to use. Can be with 'ward' or 'genie' (default='ward')
 #' @param n.cores number of cores to use (currently not implemented)
 #'
 #' @return a sparse.data object with the prior optimised via grid search
@@ -18,7 +19,8 @@
 #' sparse.data <- optimise_prior(sparse.data)
 #'
 #' @export
-optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symmetric", n.cores=1){
+optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symmetric", hc.method='ward',
+                           n.cores=1){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -27,9 +29,10 @@ optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symme
   if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!(type %in% c("symmetric", "hc", "optimise.baps", "baps", "ref"))) stop("Invalid value for type. Must be one of 'symmetric', 'hc', 'ref' or 'baps'")
   if(!all(grid.interval>0)) stop("grid values must greater than 0")
+  if(!(hc.method %in% c("ward", "genie"))) stop("Invalid hc.method!")
 
   #create hclust object
-  h <- get_hclust(sparse.data, TRUE, n.cores)
+  h <- get_hclust(sparse.data, TRUE, hc.method, n.cores)
 
   if(type=="hc"){
     #initialise prior

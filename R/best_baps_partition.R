@@ -62,8 +62,17 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
   threshold <- log(0.5)
   rk <- llks$rk[(n.isolates+1):length(llks$rk)]
   clusters <- -c(1:n.isolates)
+
+  #iterate through backwards to resolve any clashes that occur in non fastbaps hierarchies
+  temp.rk <- rk[1:nrow(h$merge)]
+  for(i in nrow(h$merge):1){
+    if(temp.rk[[i]]>threshold){
+      temp.rk[h$merge[i,][h$merge[i,]>0]] <- threshold+1
+    }
+  }
+
   for (i in 1:nrow(h$merge)){
-    if(rk[[i]]>threshold){
+    if(temp.rk[[i]]>threshold){
       clusters[clusters %in% h$merge[i,]] <- i
     }
   }

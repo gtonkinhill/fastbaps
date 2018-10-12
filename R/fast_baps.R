@@ -7,6 +7,7 @@
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param k.init the initial number of clusters to start the bayesian hierarchical clustering from. Defaults to (number of sequences)/4
+#' @param hc.method the type of initial hierarchical clustering to use. Can be with 'ward' or 'genie' (default='ward')
 #' @param n.cores the number of cores to use in clustering
 #' @param quiet whether or not to print progress information (default=FALSE)
 #'
@@ -19,7 +20,7 @@
 #' system.time({baps.hc <- fast_baps(sparse.data)})
 #'
 #' @export
-fast_baps <- function(sparse.data, k.init=NULL, n.cores=1, quiet=FALSE){
+fast_baps <- function(sparse.data, k.init=NULL, hc.method="ward", n.cores=1, quiet=FALSE){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -31,6 +32,7 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1, quiet=FALSE){
   if(!is.null(k.init)){
     if(!is.numeric(k.init) | k.init < 0) stop("Invalid value for k.init!")
   }
+  if(!(hc.method %in% c("ward", "genie"))) stop("Invalid hc.method!")
 
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
@@ -52,7 +54,7 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1, quiet=FALSE){
     dk.initial <- rep(0, n.isolates)
   } else {
     if(is.null(sparse.data$hclust)){
-      h <- get_hclust(sparse.data, quiet, n.cores)
+      h <- get_hclust(sparse.data, quiet, hc.method, n.cores)
     } else {
       h <- sparse.data$hclust
     }
@@ -78,11 +80,8 @@ fast_baps <- function(sparse.data, k.init=NULL, n.cores=1, quiet=FALSE){
   if(!quiet){
     print("Clustering using hierarchical Bayesian clustering...")
   }
-  if(n.cores==1){
-    baps <- fastbaps:::bhier(sparse.data, initial.partition, dk.initial)
-  } else {
-    baps <- fastbaps:::bhier_parallel(sparse.data, initial.partition, dk.initial, n.cores)
-  }
+
+  baps <- fastbaps:::bhier_parallel(sparse.data, initial.partition, dk.initial, n.cores)
 
   hc <- fastbaps:::combine_clusterings(baps, initial.partition)
 

@@ -7,6 +7,7 @@
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param levels the number of levels to investigate (default=2)
 #' @param k.init the initial number of clusters for the top level (default=n.isolates/4)
+#' @param hc.method the type of initial hierarchical clustering to use. Can be with 'ward' or 'genie' (default='ward')
 #' @param n.cores the number of cores to use in clustering
 #' @param quiet whether to print additional information or not (default=TRUE)
 #'
@@ -19,7 +20,8 @@
 #' multi.res.df <- multi_res_baps(sparse.data, levels=2)
 #'
 #' @export
-multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1, quiet=TRUE){
+multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, hc.method='ward',
+                           n.cores=1, quiet=TRUE){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -28,6 +30,7 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1, quiet=
   if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(n.cores) || n.cores<1) stop("Invalid value for n.cores!")
   if(!is.numeric(levels) | levels < 0) stop("Invalid value for levels!")
+  if(!(hc.method %in% c("ward", "genie"))) stop("Invalid hc.method!")
 
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
@@ -58,9 +61,11 @@ multi_res_baps <- function(sparse.data, levels=2, k.init=NULL, n.cores=1, quiet=
         temp.data$hclust <- NULL
 
         if((l==1) && !is.null(k.init)){
-          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = k.init, quiet = quiet)
+          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, k.init = k.init,
+                                    hc.method=hc.method, quiet = quiet)
         } else {
-          fb <- fastbaps::fast_baps(temp.data, n.cores = n.cores, quiet = quiet)
+          fb <- fastbaps::fast_baps(temp.data, hc.method=hc.method, n.cores = n.cores,
+                                    quiet = quiet)
         }
 
         new.partitions[part] <- n.isolates*p*2 + fastbaps::best_baps_partition(temp.data, fb, quiet = quiet)

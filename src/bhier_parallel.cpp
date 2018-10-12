@@ -1,3 +1,4 @@
+#include <chrono>  // for high_resolution_clock
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
@@ -46,6 +47,9 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   std::vector<arma::sp_umat> sp_partition_counts;
 
   // Pre-compute lgamma values up to three decimal places for each possible count lgamma(x+decimal)
+
+  auto start = std::chrono::high_resolution_clock::now();
+
   int lg_size = ceil(max(prior)*1000)+3;
   arma::dmat pre_lgamma = arma::dmat(n_isolates+2, lg_size);
   for(i=0; i<(n_isolates+2); i++){
@@ -73,6 +77,11 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
       term1(partition_length) += lgamma(alpha_sum) - lgamma(partition_length+alpha_sum);
     }
   }
+
+  auto finish = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = finish - start;
+  std::cout << "Start up time: " << elapsed.count() << " s\n";
+  start = std::chrono::high_resolution_clock::now();
 
 
   // Count initial alleles for each partition into sparse matrices.
@@ -116,6 +125,11 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   }
 }
 
+finish = std::chrono::high_resolution_clock::now();
+elapsed = finish - start;
+std::cout << "Allocate matrices time: " << elapsed.count() << " s\n";
+start = std::chrono::high_resolution_clock::now();
+
 // For each pair of partitions calculate the posterior probability of combining them.
 #pragma omp parallel shared(mllk, term1, sp_partition_counts, rk, pre_lgamma, prior_index, p_tree, d_k)
 {
@@ -148,6 +162,11 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   }
 }
 
+finish = std::chrono::high_resolution_clock::now();
+elapsed = finish - start;
+std::cout << "Initial all v all calc: " << elapsed.count() << " s\n";
+start = std::chrono::high_resolution_clock::now();
+
 // Iteratively cluster the closest two clusters by mllk
 IntegerVector group_mems = -seq_len(n_partitions); // Tracks group membership
 NumericMatrix edges((n_partitions-1), 2);
@@ -155,21 +174,23 @@ NumericVector heights((n_partitions-1), 0.0); //hclust height output
 NumericVector rk_vec((n_partitions-1), 0.0);
 arma::umat used = arma::zeros<arma::umat>(n_partitions); //already clustered
 NumericVector neg_inf_llk_vec(n_partitions, -std::numeric_limits<double>::infinity());
-int row_index, col_index, max_i, min_i;
-double temp_max;
+int row_index, col_index, max_i, min_i, temp_max;
 
 for(j=0; j<(n_partitions-1); j++) {
   // Find max mllk and corresponding indices
-  temp_max = -std::numeric_limits<double>::infinity();
-  for(p1=0; p1<n_partitions; p1++){
-    for(p2=(p1+1); p2<n_partitions; p2++){
-      if(temp_max < rk(p1,p2)){
-        temp_max = rk(p1,p2);
-        row_index = p1;
-        col_index = p2;
-      }
-    }
-  }
+  // temp_max = -std::numeric_limits<double>::infinity();
+  // for(p1=0; p1<n_partitions; p1++){
+  //   for(p2=(p1+1); p2<n_partitions; p2++){
+  //     if(temp_max < rk(p1,p2)){
+  //       temp_max = rk(p1,p2);
+  //       row_index = p1;
+  //       col_index = p2;
+  //     }
+  //   }
+  // }
+  temp_max = rk.index_max();
+  col_index = temp_max / n_partitions;
+  row_index = temp_max % n_partitions;
 
   if(row_index > col_index){
     max_i = row_index;
@@ -240,6 +261,11 @@ for(j=0; j<(n_partitions-1); j++) {
 }
 
 }
+
+finish = std::chrono::high_resolution_clock::now();
+elapsed = finish - start;
+std::cout << "Final hierarchical part: " << elapsed.count() << " s\n";
+start = std::chrono::high_resolution_clock::now();
 
 return(List::create(Named("initial_partition_llk") = initial_partition_llk,
                     Named("edges") = edges,

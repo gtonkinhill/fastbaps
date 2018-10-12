@@ -45,7 +45,6 @@ multi_level_best_baps_partition <- function(sparse.data, h, levels=2, n.cores=1,
   ) || !(all(h$labels %in% colnames(sparse.data$snp.matrix)))){
     stop("Label mismatch between hierarchy and sparse.data!")
   }
-
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
 
@@ -57,6 +56,7 @@ multi_level_best_baps_partition <- function(sparse.data, h, levels=2, n.cores=1,
     prev.partition <- split(1:n.isolates, cluster.results[,l])
 
     new.partitions <- rep(NA, n.isolates)
+    names(new.partitions) <- colnames(sparse.data$snp.matrix)
     for (p in seq_along(prev.partition)){
       part <- prev.partition[[p]]
       if (length(part)>4){
@@ -79,8 +79,7 @@ multi_level_best_baps_partition <- function(sparse.data, h, levels=2, n.cores=1,
         temp.h <- ape::as.hclust.phylo(temp.h)
 
         bbp <- fastbaps::best_baps_partition(temp.data, temp.h, quiet = quiet)
-        bbp <- bbp[match(colnames(temp.data$snp.matrix), names(bbp))]
-        new.partitions[part] <- n.isolates*p*2 + bbp
+        new.partitions <- c(n.isolates*p*2 + bbp)[match(names(new.partitions),names(bbp))]
       } else {
         new.partitions[part] <- n.isolates*p*2
       }
