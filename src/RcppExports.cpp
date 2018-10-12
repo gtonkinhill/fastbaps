@@ -68,17 +68,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_min_cols
-double get_min_cols(const arma::mat& x);
-RcppExport SEXP _fastbaps_get_min_cols(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_min_cols(x));
-    return rcpp_result_gen;
-END_RCPP
-}
 // tree_llk
 List tree_llk(List data, arma::imat merges);
 RcppExport SEXP _fastbaps_tree_llk(SEXP dataSEXP, SEXP mergesSEXP) {
@@ -98,7 +87,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fastbaps_calc_ddk", (DL_FUNC) &_fastbaps_calc_ddk, 2},
     {"_fastbaps_import_fasta_to_vector_each_nt", (DL_FUNC) &_fastbaps_import_fasta_to_vector_each_nt, 1},
     {"_fastbaps_part_llks", (DL_FUNC) &_fastbaps_part_llks, 2},
-    {"_fastbaps_get_min_cols", (DL_FUNC) &_fastbaps_get_min_cols, 1},
     {"_fastbaps_tree_llk", (DL_FUNC) &_fastbaps_tree_llk, 2},
     {NULL, NULL, 0}
 };

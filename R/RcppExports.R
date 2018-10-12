@@ -21,10 +21,6 @@ part_llks <- function(data, partitions) {
     .Call('_fastbaps_part_llks', PACKAGE = 'fastbaps', data, partitions)
 }
 
-get_min_cols <- function(x) {
-    .Call('_fastbaps_get_min_cols', PACKAGE = 'fastbaps', x)
-}
-
 tree_llk <- function(data, merges) {
     .Call('_fastbaps_tree_llk', PACKAGE = 'fastbaps', data, merges)
 }
