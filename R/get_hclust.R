@@ -34,12 +34,13 @@ get_hclust <- function(sparse.data, quiet, method="ward", n.cores=1){
       print("Large number of sequences so using an initial PCA and the genie hierarchical clustering algorithm.")
     }
     temp.matrix <- 1*t(sparse.data$snp.matrix>0)
-    svd <- irlba::irlba(temp.matrix, nv=50, tol=0.1, center=colMeans(temp.matrix))
+    pc <- irlba::prcomp_irlba(temp.matrix, n=50)
+    # svd <- irlba::irlba(temp.matrix, nv=50, tol=0.1, center=colMeans(temp.matrix))
     if(method=="genie"){
-      h <- genie::hclust2(d="euclidean", objects = svd$u, useVpTree=FALSE, thresholdGini = 1)
+      h <- genie::hclust2(d="euclidean", objects = pc$x, useVpTree=FALSE, thresholdGini = 1)
       h$labels <- colnames(sparse.data$snp.matrix)
     } else {
-      h <- fastcluster::hclust.vector(X = svd$u, method = "ward")
+      h <- fastcluster::hclust.vector(X = pc$x, method = "ward")
       h$labels <- colnames(sparse.data$snp.matrix)
     }
     gc()
