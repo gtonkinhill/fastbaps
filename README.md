@@ -1,6 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-<!-- [![Travis-CI Build Status](https://travis-ci.org/gtonkinhill/fastbaps.svg?branch=master)](https://travis-ci.org/gtonkinhill/fastbaps) -->
+[![Travis-CI Build Status](https://travis-ci.com/gtonkinhill/fastbaps.svg?branch=master)](https://travis-ci.com/gtonkinhill/fastbaps) [![DOI](https://zenodo.org/badge/137083307.svg)](https://zenodo.org/badge/latestdoi/137083307)
+
 fastbaps
 ========
 
