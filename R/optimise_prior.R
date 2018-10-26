@@ -27,7 +27,7 @@ optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "optim
   if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
-  if(!(type %in% c("optimise.symmetric","symmetric", "hc", "optimise.baps", "baps"))) stop("Invalid value for type. Must be one of 'symmetric', 'hc', 'ref' or 'baps'")
+  if(!(type %in% c("optimise.symmetric","symmetric", "hc", "optimise.baps", "baps"))) stop("Invalid value for type. Must be one of 'optimise.symmetric','symmetric', 'hc', 'optimise.baps' or 'baps'")
   if(!all(grid.interval>0)) stop("grid values must greater than 0")
   if(!(hc.method %in% c("ward", "genie"))) stop("Invalid hc.method!")
 

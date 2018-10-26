@@ -35,7 +35,6 @@ Alternatively, we can condition on an initial phylogentic or hierarchical tree a
 
 ```{r}
 library(fastbaps)
-library(rhierbaps)
 library(ggtree)
 library(phytools)
 library(ggplot2)

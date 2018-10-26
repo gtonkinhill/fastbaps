@@ -57,7 +57,6 @@ Libraries
 
 ``` r
 library(fastbaps)
-library(rhierbaps)
 library(ggtree)
 library(phytools)
 library(ggplot2)
