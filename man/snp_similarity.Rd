@@ -7,7 +7,7 @@
 snp_similarity(sparse.data)
 }
 \arguments{
-\item{sparse.matrix}{a sparse SNP data object returned from import_fasta_sparse_nt}
+\item{sparse.data}{a sparse SNP data object returned from import_fasta_sparse_nt}
 }
 \value{
 A pairwise snp similarity matrix

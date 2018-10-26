@@ -4,8 +4,8 @@
 #'
 #' @import ape
 #'
-#' @param x
-#' @param attribute
+#' @param x hclust object
+#' @param attribute attributes for nodes
 #'
 #'
 # adpated from ape as.phylo
@@ -43,5 +43,5 @@ as.phylo.hclust.node.attributes <- function(x, attribute)
   obj <- list(edge = edge, edge.length = edge.length / 2,
               tip.label = x$labels, Nnode = N, node.attributes=node.attributes)
   class(obj) <- "phylo"
-  reorder(obj)
+  stats::reorder(obj)
 }

@@ -35,14 +35,14 @@ fix_clusters <- function(sparse.data, clusters, n.iterations=1){
   n.isolates <- ncol(sparse.data$snp.matrix)
   n.snps <- nrow(sparse.data$snp.matrix)
   partitions <- split(1:n.isolates, clusters)
-  current.llks <- fastbaps:::part_llks(sparse.data, partitions)$llk
+  current.llks <- part_llks(sparse.data, partitions)$llk
 
   is.improved <- FALSE
   for (it in 1:n.iterations){
     for (i in 1:n.isolates){
       #find best potential swap
       temp.partitions <- lapply(partitions, function(p) unique(unlist(c(i, p))))
-      temp.part.llks <- fastbaps:::part_llks(sparse.data, temp.partitions)$llk
+      temp.part.llks <- part_llks(sparse.data, temp.partitions)$llk
       diff <- current.llks-temp.part.llks
       diff[[clusters[i]]] <- Inf
       best.move <- which.min(diff)
@@ -52,7 +52,7 @@ fix_clusters <- function(sparse.data, clusters, n.iterations=1){
       temp.clusters[[i]] <- best.move
       temp.clusters <- as.numeric(factor(temp.clusters)) #re-number in case a cluster has been removed.
       temp.partitions <- split(1:n.isolates, temp.clusters)
-      temp.part.llks <- fastbaps:::part_llks(sparse.data, temp.partitions)$llk
+      temp.part.llks <- part_llks(sparse.data, temp.partitions)$llk
 
       #test if it improves things
       if(sum(current.llks) < sum(temp.part.llks)){

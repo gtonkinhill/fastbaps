@@ -6,6 +6,11 @@
 \usage{
 find_max_cluster_subset(phylo, node.weights)
 }
+\arguments{
+\item{phylo}{a phylo object}
+
+\item{node.weights}{node weights}
+}
 \description{
 Function to find the best partition given a weighting on the nodes
 }

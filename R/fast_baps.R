@@ -62,9 +62,9 @@ fast_baps <- function(sparse.data, k.init=NULL, hc.method="ward", n.cores=1, qui
     if(!quiet){
       print("Calculating initial dk values...")
     }
-    dk <- fastbaps:::calc_ddk(sparse.data, h$merge)
-    phylo <- fastbaps:::as.phylo.hclust.node.attributes(h, dk$dk[(length(h$labels)+1):length(dk$dk)])
-    initial.partition <- split(1:n.isolates, cutree(h, k = min(n.isolates, k.init)))
+    dk <- calc_ddk(sparse.data, h$merge)
+    phylo <- as.phylo.hclust.node.attributes(h, dk$dk[(length(h$labels)+1):length(dk$dk)])
+    initial.partition <- split(1:n.isolates, stats::cutree(h, k = min(n.isolates, k.init)))
 
     dk.initial <- unlist(parallel::mclapply(initial.partition, function(part){
       if(length(part)<=1){
@@ -81,9 +81,9 @@ fast_baps <- function(sparse.data, k.init=NULL, hc.method="ward", n.cores=1, qui
     print("Clustering using hierarchical Bayesian clustering...")
   }
 
-  baps <- fastbaps:::bhier_parallel(sparse.data, initial.partition, dk.initial, n.cores)
+  baps <- bhier_parallel(sparse.data, initial.partition, dk.initial, n.cores)
 
-  hc <- fastbaps:::combine_clusterings(baps, initial.partition)
+  hc <- combine_clusterings(baps, initial.partition)
 
   hc$labels <- colnames(sparse.data$snp.matrix)
 
@@ -139,7 +139,7 @@ combine_clusterings <- function(baps, initial.partition){
     node.count <- node.count + 1
   }
 
-  hc <- structure(list(merge = new.merge, height = -heights, order = fastbaps:::iorder(new.merge),
+  hc <- structure(list(merge = new.merge, height = -heights, order = iorder(new.merge),
                        labels = 1:n.isolates, method = NULL,
                        call = match.call(), dist.method = NULL),
                   class = "hclust")

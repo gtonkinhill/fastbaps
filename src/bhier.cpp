@@ -3,7 +3,7 @@
 // [[Rcpp::plugins(cpp11)]]
 
 
-#include "log_add_sub.hpp"
+#include "log_add_sub.h"
 #include <cmath>
 
 using namespace Rcpp;

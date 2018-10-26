@@ -4,7 +4,7 @@
 #'
 #' @import Matrix
 #'
-#' @param sparse.matrix a sparse SNP data object returned from import_fasta_sparse_nt
+#' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param partition the partition for which the log marginal likelihood is to be calculated
 #'
 #' @return the log marginal likelihood
@@ -29,7 +29,7 @@ calc_marginal_llk <- function(sparse.data, partition){
 
   partition.list <- split(1:ncol(sparse.data$snp.matrix), partition)
 
-  mllk <- fastbaps:::part_llks(sparse.data, partition.list)$llk
+  mllk <- part_llks(sparse.data, partition.list)$llk
 
   return(sum(mllk))
 }

@@ -7,7 +7,7 @@
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param grid.interval the upper and lower bound for the hyperparameter to optimise over (default=c(5e-4, 10))
-#' @param type one of "flat" or "hc" indicating a flat prior or the approach of Heller et al.
+#' @param type one of 'optimise.symmetric','symmetric', 'optimise.baps', 'baps' or 'hc'. (default='optimise.baps')
 #' @param hc.method the type of initial hierarchical clustering to use. Can be with 'ward' or 'genie' (default='ward')
 #' @param n.cores number of cores to use (currently not implemented)
 #'
@@ -19,7 +19,7 @@
 #' sparse.data <- optimise_prior(sparse.data)
 #'
 #' @export
-optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symmetric", hc.method='ward',
+optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "optimise.baps", hc.method='ward',
                            n.cores=1){
 
   # Check inputs
@@ -27,7 +27,7 @@ optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symme
   if(!(class(sparse.data$snp.matrix)=="dgCMatrix")) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.numeric(sparse.data$consensus)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
   if(!is.matrix(sparse.data$prior)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
-  if(!(type %in% c("symmetric", "hc", "optimise.baps", "baps", "ref"))) stop("Invalid value for type. Must be one of 'symmetric', 'hc', 'ref' or 'baps'")
+  if(!(type %in% c("optimise.symmetric","symmetric", "hc", "optimise.baps", "baps"))) stop("Invalid value for type. Must be one of 'symmetric', 'hc', 'ref' or 'baps'")
   if(!all(grid.interval>0)) stop("grid values must greater than 0")
   if(!(hc.method %in% c("ward", "genie"))) stop("Invalid hc.method!")
 
@@ -65,17 +65,14 @@ optimise_prior <- function(sparse.data, grid.interval=c(5e-4, 10), type = "symme
     initial.prior <- t(t(initial.prior)/colSums(initial.prior))
     initial.prior <- initial.prior>0
     initial.prior <- t(t(initial.prior)/colSums(initial.prior))
-  } else if (type=="ref") {
-    initial.prior <- matrix(1, nrow = nrow(sparse.data$prior), ncol = ncol(sparse.data$prior))
-    initial.prior[1,] <- 2
   } else {
     initial.prior <- matrix(1, nrow = nrow(sparse.data$prior), ncol = ncol(sparse.data$prior))
   }
   sparse.data$prior <- initial.prior
 
-  if (type=="baps") return(sparse.data)
+  if ((type=="baps") || (type=="symmetric")) return(sparse.data)
 
-  opt <- optimise(calc_prior_prob, grid.interval, sparse.data, initial.prior, h, maximum = TRUE, tol=1e-3)
+  opt <- stats::optimise(calc_prior_prob, grid.interval, sparse.data, initial.prior, h, maximum = TRUE, tol=1e-3)
   cc <- round(opt$maximum, digits = 3)
 
   sparse.data$prior <- initial.prior*cc
@@ -99,7 +96,7 @@ calc_prior_prob <- function(cc, temp.sparse.data, temp.initial.prior, temp.h){
   cc <- round(cc, digits = 3) #as otherwise we run into issue with rounding in the llk calculation due to the way lgamma is calculated
   temp.sparse.data$prior <- temp.initial.prior * cc
   temp.sparse.data$prior[temp.sparse.data$prior<1e-3] <- 1e-3
-  llks <- fastbaps:::tree_llk(temp.sparse.data, temp.h$merge)
+  llks <- tree_llk(temp.sparse.data, temp.h$merge)
   prob.tree <- llks$ptree[length(llks$ptree)]
   return(prob.tree)
 }

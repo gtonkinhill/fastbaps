@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 ```{r, eval = FALSE}
 install.packages("devtools")
 
-devtools::install_github("gtonkinhill/fastbaps", auth_token="37064ad364627e23377a492cf790285642256a23")
+devtools::install_github("gtonkinhill/fastbaps")
 ```
 
 If you would like to also build the vignette with your installation run:
@@ -50,8 +50,9 @@ library(ape)
 
 fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 sparse.data <- import_fasta_sparse_nt(fasta.file.name)
+sparse.data <- optimise_prior(sparse.data, type = "optimise.symmetric")
 baps.hc <- fast_baps(sparse.data)
-best.partition <- best_baps_partition(sparse.data, as.phylo(baps.hc))
+clusters <- best_baps_partition(sparse.data, as.phylo(baps.hc))
 ```
 
 ```{r, echo = FALSE}

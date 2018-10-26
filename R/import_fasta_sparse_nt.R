@@ -26,7 +26,7 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
     if(!is.logical(check.fasta)) stop("check.fasta should be one of TRUE/FALSE!")
     if(check.fasta){
       # Cheat a bit by checking the file using ape
-      invisible(capture.output(ape::read.FASTA(fasta, type = "DNA")))
+      invisible(utils::capture.output(ape::read.FASTA(fasta, type = "DNA")))
     }
   }
   if(!is.character(prior)) stop("Invalid input for prior parameter!")
@@ -52,7 +52,7 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
                                  dimnames = list(1:snp.data$seq.length, snp.data$seq.names)))
 
   } else {
-    snp.data <- fastbaps:::import_fasta_to_vector_each_nt(fasta)
+    snp.data <- import_fasta_to_vector_each_nt(fasta)
     snp.data$seq.names <-  gsub("^>","",snp.data$seq.names)
 
     snp.matrix <- sparseMatrix(i=snp.data$i,

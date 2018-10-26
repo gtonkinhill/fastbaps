@@ -11,7 +11,7 @@ best_baps_partition(sparse.data, h, quiet = FALSE)
 
 \item{h}{a hclust object representing the hierarchical clustering that is to be cut}
 
-\item{quiet}{}
+\item{quiet}{suppress the printing of extra information (default=FALSE)}
 }
 \value{
 a final clustering

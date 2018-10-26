@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include "kseq.hpp"
+#include "kseq.h"
 #include <iostream>
 #include <fcntl.h>
 #include <stdio.h>

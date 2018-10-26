@@ -6,7 +6,7 @@
 #'
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param h a hclust object representing the hierarchical clustering that is to be cut
-#' @param quiet
+#' @param quiet suppress the printing of extra information (default=FALSE)
 #'
 #' @return a final clustering
 #'
@@ -52,7 +52,7 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
   if(!quiet){
     print("Calculating node marginal llks...")
   }
-  llks <- fastbaps:::tree_llk(sparse.data, h$merge)
+  llks <- tree_llk(sparse.data, h$merge)
   n.isolates <- ncol(sparse.data$snp.matrix)
 
   if(!quiet){

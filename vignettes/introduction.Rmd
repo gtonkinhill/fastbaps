@@ -15,6 +15,7 @@ editor_options:
   chunk_output_type: console
 ---
 
+
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8,
                       echo=TRUE, warning=FALSE, message=FALSE,
@@ -38,8 +39,6 @@ library(rhierbaps)
 library(ggtree)
 library(phytools)
 library(ggplot2)
-
-set.seed(1234)
 ```
 
 ## Loading data
@@ -51,6 +50,11 @@ fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 ```
 
+Here we make use of the 'optimised symmetric' prior, which empirically chooses the variance of the Dirichlet prior on the component mixtures.
+
+```{r}
+sparse.data <- optimise_prior(sparse.data, type = "optimise.symmetric")
+```
 
 ## Running fastbaps
 
@@ -60,64 +64,45 @@ It is a good idea to choose `k.init` to be significantly larger than the number 
 baps.hc <- fast_baps(sparse.data)
 ```
 
-This provides a Bayesian hierarchical clustering of the data. To obtain the partition of this hierarchy that maximises the marginal likelihood run
+This provides a Bayesian hierarchical clustering of the data. To obtain the partition of this hierarchy under Dirichlet Process Mixture model run
 
 ```{r}
 best.partition <- best_baps_partition(sparse.data, baps.hc)
 ```
 
-We can compare the log marginal likelihood with that obtained using hierbaps.
-
-```{r}
-snp.matrix <- load_fasta(fasta.file.name)
-hb.results <- hierBAPS(snp.matrix, max.depth = 2, n.pops = 20, quiet = TRUE)
-
-calc_marginal_llk(sparse.data, hb.results$partition.df$`level 1`)
-calc_marginal_llk(sparse.data, best.partition)
-```
-
-We can also plot the output of the two algorithms along with a pre-calculated tree using ggtree [@Yu2017-bf].
+We can  plot the output of the  algorithm along with a pre-calculated tree using ggtree [@Yu2017-bf].
 
 ```{r}
 newick.file.name <- system.file("extdata", "seqs.fa.treefile", package = "fastbaps")
 iqtree <- phytools::read.newick(newick.file.name)
 plot.df <- data.frame(id=colnames(sparse.data$snp.matrix),
-                      val=hb.results$partition.df$`level 1`,
                       fastbaps=best.partition,
                       stringsAsFactors = FALSE)
 
 gg <- ggtree(iqtree)
-gg <- gg %<+% data.frame(id=colnames(sparse.data$snp.matrix),
-                      hierBAPS=hb.results$partition.df$`level 1`)
-gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
 
-f1 <- facet_plot(gg, panel="hierBAPS", data=plot.df, geom=geom_tile, aes(x=val), color='red')
-f2 <- facet_plot(f1, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
+f2 <- facet_plot(gg, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
 f2
 ```
 
-We can compare this result to other priors, either flat or the population mean based prior of Heller et al.
+We can compare this result to other priors, the un-optimised symmetric or BAPS prior similar to STRUCTURE and hierBAPS, an optimised BAPS prior or the population mean based prior of Heller et al.
 
 ```{r}
-sparse.data <- optimise_prior(sparse.data, type = "flat")
+sparse.data <- optimise_prior(sparse.data, type = "baps")
 
 baps.hc <- fast_baps(sparse.data)
 best.partition <- best_baps_partition(sparse.data, baps.hc)
 
 plot.df <- data.frame(id=colnames(sparse.data$snp.matrix),
-                      val=hb.results$partition.df$`level 1`,
                       fastbaps=best.partition,
                       stringsAsFactors = FALSE)
 
 gg <- ggtree(iqtree)
-gg <- gg %<+% data.frame(id=colnames(sparse.data$snp.matrix),
-                      hierBAPS=hb.results$partition.df$`level 1`)
-gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
-
-f1 <- facet_plot(gg, panel="hierBAPS", data=plot.df, geom=geom_tile, aes(x=val), color='red')
-f2 <- facet_plot(f1, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
+f2 <- facet_plot(gg, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
 f2
 ```
+
+we can also use the same prior as used in the BHC algorithm of Heller et al. However this tends to overpartition population genetic data.
 
 ```{r}
 sparse.data <- optimise_prior(sparse.data, type = "hc")
@@ -126,44 +111,33 @@ baps.hc <- fast_baps(sparse.data)
 best.partition <- best_baps_partition(sparse.data, baps.hc)
 
 plot.df <- data.frame(id=colnames(sparse.data$snp.matrix),
-                      val=hb.results$partition.df$`level 1`,
                       fastbaps=best.partition,
                       stringsAsFactors = FALSE)
 
 gg <- ggtree(iqtree)
-gg <- gg %<+% data.frame(id=colnames(sparse.data$snp.matrix),
-                      hierBAPS=hb.results$partition.df$`level 1`)
-gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
-
-f1 <- facet_plot(gg, panel="hierBAPS", data=plot.df, geom=geom_tile, aes(x=val), color='red')
-f2 <- facet_plot(f1, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
+f2 <- facet_plot(gg, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
 f2
 ```
 
 we can also investigate multiple levels
 
 ```{r}
-sparse.data <- import_fasta_sparse_nt(fasta.file.name, prior = "baps")
+sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 multi <- multi_res_baps(sparse.data)
 
 plot.df <- data.frame(id=colnames(sparse.data$snp.matrix),
-                      val=hb.results$partition.df$`level 1`,
                       fastbaps=multi$`Level 1`,
                       fastbaps2=multi$`Level 2`,
                       stringsAsFactors = FALSE)
 
 gg <- ggtree(iqtree)
-gg <- gg %<+% data.frame(id=colnames(sparse.data$snp.matrix),
-                      hierBAPS=hb.results$partition.df$`level 1`)
-gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
 
-f1 <- facet_plot(gg, panel="hierBAPS", data=plot.df, geom=geom_tile, aes(x=val), color='red')
-f2 <- facet_plot(f1, panel="fastbaps level 1", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
-f2 <- facet_plot(f1, panel="fastbaps level 2", data=plot.df, geom=geom_tile, aes(x=fastbaps2), color='green')
+f2 <- facet_plot(gg, panel="fastbaps level 1", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
+f2 <- facet_plot(f2, panel="fastbaps level 2", data=plot.df, geom=geom_tile, aes(x=fastbaps2), color='green')
 f2
 ```
 
-finally we can condition on an initial hierarchy or phylogeny.
+We can also partition an initial hierarchy or phylogeny.
 
 ```{r}
 sparse.data <- import_fasta_sparse_nt(fasta.file.name, prior = "baps")
@@ -171,41 +145,23 @@ sparse.data <- import_fasta_sparse_nt(fasta.file.name, prior = "baps")
 iqtree.rooted <- phytools::midpoint.root(iqtree)
 best.partition <- best_baps_partition(sparse.data, iqtree.rooted)
 
-temp.df <- hb.results$partition.df[match(iqtree.rooted$tip.label, hb.results$partition.df$Isolate),]
-
 plot.df <- data.frame(id=iqtree.rooted$tip.label,
-                      val=temp.df$`level 1`,
                       fastbaps=best.partition,
                       stringsAsFactors = FALSE)
 
 gg <- ggtree(iqtree.rooted)
-gg <- gg %<+% data.frame(id=colnames(sparse.data$snp.matrix),
-                      hierBAPS=hb.results$partition.df$`level 1`)
-gg <- gg + geom_tippoint(aes(color = factor(hierBAPS)))
-
-f1 <- facet_plot(gg, panel="hierBAPS", data=plot.df, geom=geom_tile, aes(x=val), color='red')
-f2 <- facet_plot(f1, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
+f2 <- facet_plot(gg, panel="fastbaps", data=plot.df, geom=geom_tile, aes(x=fastbaps), color='blue')
 f2
 ```
 
-##Calculating pairwise SNP similarity and distance matrices
-
-The fastbaps package includes functions for very quickly obtaining pairwise SNP matrices. It achieves this by taking advantage of very fast sparse matrix algebra libraries. 
+finally we can also look at the stability of the inferred clusters using the Bootstrap
 
 ```{r}
-snp.similarity.matrix <- snp_similarity(sparse.data)
-snp.distance.matrix <- snp_dist(sparse.data)
+sparse.data <- optimise_prior(sparse.data, type = "optimise.symmetric")
+boot.result <- boot_fast_baps(sparse.data)
+dendro <- as.dendrogram(fast_baps(sparse.data))
+heatmap(boot.result, dendro, dendro)
 ```
-
-By using the distance matrix to very quickly calculate a hierarchy using Ward's method we can get a reasonable result very quickly.
-
-```{r}
-d <- as.dist(snp.distance.matrix/max(snp.distance.matrix))
-h <- hclust(d, method = "ward.D2")
-best.partition.ward <- best_baps_partition(sparse.data, h)
-calc_marginal_llk(sparse.data, best.partition.ward)
-```
-
 
 ## References
 
@@ -214,6 +170,7 @@ nocite: '@*'
 ...
 
 ##Appendix
+
 ```{r}
 sessionInfo()
 ```

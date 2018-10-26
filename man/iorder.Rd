@@ -7,7 +7,7 @@
 iorder(m)
 }
 \arguments{
-\item{m}{}
+\item{m}{hclust edges matrix}
 }
 \value{
 an ordering

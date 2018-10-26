@@ -36,10 +36,10 @@ multi_level_best_baps_partition <- function(sparse.data, h, levels=2, n.cores=1,
   if(class(h)=="phylo"){
     if(!ape::is.rooted(h)) stop("phylo object must be rooted")
     h <- ape::multi2di(h)
-    nh <- nodeHeights(h)
+    nh <- phytools::nodeHeights(h)
     tip.edges <- h$edge[,2]<=length(h$tip.label)
     h$edge.length[tip.edges] <- h$edge.length[tip.edges] + (max(nh)-nh[tip.edges,2])
-    h <- as.hclust(h)
+    h <- stats::as.hclust(h)
   }
   if(!all(colnames(sparse.data$snp.matrix) %in% h$labels
   ) || !(all(h$labels %in% colnames(sparse.data$snp.matrix)))){

@@ -4,7 +4,7 @@
 #'
 #' @import Matrix
 #'
-#' @param sparse.matrix a sparse SNP data object returned from import_fasta_sparse_nt
+#' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #'
 #' @return A pairwise snp similarity matrix
 #'

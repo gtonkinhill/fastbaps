@@ -2,6 +2,9 @@
 #'
 #' Function to find the best partition given a weighting on the nodes
 #'
+#' @param phylo a phylo object
+#' @param node.weights node weights
+#'
 #' @import Matrix
 #'
 find_max_cluster_subset <- function(phylo, node.weights){

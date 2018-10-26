@@ -2,7 +2,7 @@
 #'
 #' A function used to order a hclust object for plotting. Taken directly from https://github.com/bwlewis/hclust_in_R/blob/master/hc.R
 #'
-#' @param m
+#' @param m hclust edges matrix
 #'
 #' @return an ordering
 #'
