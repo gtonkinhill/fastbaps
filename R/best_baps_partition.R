@@ -40,6 +40,7 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
     nh <- phytools::nodeHeights(h)
     tip.edges <- h$edge[,2]<=length(h$tip.label)
     h$edge.length[tip.edges] <- h$edge.length[tip.edges] + (max(nh)-nh[tip.edges,2])
+    h <- collapse.singles(h, root.edge=TRUE)
     h <- ape::as.hclust.phylo(h)
   }
   if(!all(colnames(sparse.data$snp.matrix) %in% h$labels
