@@ -79,7 +79,7 @@ multi_level_best_baps_partition <- function(sparse.data, h, levels=2, n.cores=1,
         temp.h <- ape::as.hclust.phylo(temp.h)
 
         bbp <- fastbaps::best_baps_partition(temp.data, temp.h, quiet = quiet)
-        new.partitions <- c(n.isolates*p*2 + bbp)[match(names(new.partitions),names(bbp))]
+        new.partitions[names(bbp)] <- c(n.isolates*p*2 + bbp)
       } else {
         new.partitions[part] <- n.isolates*p*2
       }
