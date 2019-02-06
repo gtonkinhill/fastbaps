@@ -10,7 +10,7 @@ output:
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
 editor_options: 
   chunk_output_type: console
 ---

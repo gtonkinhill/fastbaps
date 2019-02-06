@@ -8,6 +8,10 @@ warnings_are_errors: false
 
 sudo: required
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libmagick++-dev
+
 addons:
     apt:
         sources:
