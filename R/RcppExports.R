@@ -21,6 +21,10 @@ part_llks <- function(data, partitions) {
     .Call('_fastbaps_part_llks', PACKAGE = 'fastbaps', data, partitions)
 }
 
+summarise_clusters <- function(merge, rk, threshold, n_isolates) {
+    .Call('_fastbaps_summarise_clusters', PACKAGE = 'fastbaps', merge, rk, threshold, n_isolates)
+}
+
 tree_llk <- function(data, merges) {
     .Call('_fastbaps_tree_llk', PACKAGE = 'fastbaps', data, merges)
 }

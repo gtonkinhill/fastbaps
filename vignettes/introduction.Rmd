@@ -159,7 +159,7 @@ finally we can also look at the stability of the inferred clusters using the Boo
 sparse.data <- optimise_prior(sparse.data, type = "optimise.symmetric")
 boot.result <- boot_fast_baps(sparse.data)
 dendro <- as.dendrogram(fast_baps(sparse.data))
-heatmap(boot.result, dendro, dendro)
+gplots::heatmap.2(boot.result, dendro, dendro, tracecol=NA)
 ```
 
 ## References

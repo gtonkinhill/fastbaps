@@ -7,6 +7,7 @@
 #' @param sparse.data a sparse SNP data object returned from import_fasta_sparse_nt
 #' @param clusters the initial clustering to be improved. Given as a vector of cluster memberships (1 to n.cluster) of length equal to the number of sequences
 #' @param n.iterations the number of greedy maximisation iterations to perform
+#' @param quiet whether or not to print the improvements in the likelihood at each step (default=FALSE)
 #'
 #' @return a final clustering
 #'
@@ -21,7 +22,7 @@
 #' clusters <- fix_clusters(sparse.data, clusters)
 #'
 #' @export
-fix_clusters <- function(sparse.data, clusters, n.iterations=1){
+fix_clusters <- function(sparse.data, clusters, n.iterations=1, quiet=FALSE){
 
   # Check inputs
   if(!is.list(sparse.data)) stop("Invalid value for sparse.data! Did you use the import_fasta_sparse_nt function?")
@@ -56,11 +57,15 @@ fix_clusters <- function(sparse.data, clusters, n.iterations=1){
 
       #test if it improves things
       if(sum(current.llks) < sum(temp.part.llks)){
+        prev <- sum(current.llks)
         current.llks <- temp.part.llks
         partitions <- temp.partitions
         clusters <- temp.clusters
         is.improved <- TRUE
-        print("Improved!")
+        if(!quiet){
+          print(paste(c("Improved likelihood:", prev,"->", sum(temp.part.llks)),
+                      collapse = " "))
+        }
       }
     }
   }

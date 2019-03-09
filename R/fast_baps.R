@@ -11,7 +11,7 @@
 #' @param n.cores the number of cores to use in clustering
 #' @param quiet whether or not to print progress information (default=FALSE)
 #'
-#' @return a final clustering
+#' @return a final hierarchical clustering clustering as a hclust object.
 #'
 #' @examples
 #'
