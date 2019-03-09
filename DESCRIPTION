@@ -10,7 +10,7 @@ SystemRequirements: GNU make
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports:
+Imports: 
     Rcpp,
     RcppArmadillo,
     Matrix,
@@ -20,7 +20,8 @@ Imports:
     irlba,
     parallel,
     genie,
-    fastcluster
+    fastcluster,
+    gplots
 Suggests: knitr,
     rmarkdown,
     ggtree,
