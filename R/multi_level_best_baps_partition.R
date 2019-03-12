@@ -76,6 +76,7 @@ multi_level_best_baps_partition <- function(sparse.data, h, levels=2, n.cores=1,
         temp.h <- ape::as.phylo.hclust(h)
         temp.mrca <- ape::getMRCA(temp.h, colnames(temp.data$snp.matrix))
         temp.h <- ape::extract.clade(temp.h, temp.mrca)
+        temp.h <- ape::drop.tip(temp.h, temp.h$tip.label[!(temp.h$tip.label %in% colnames(temp.data$snp.matrix))])
         temp.h <- ape::as.hclust.phylo(temp.h)
 
         bbp <- fastbaps::best_baps_partition(temp.data, temp.h, quiet = quiet)
