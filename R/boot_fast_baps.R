@@ -1,6 +1,6 @@
 #' boot_fast_baps
 #'
-#' Function to perform Bayesian hierarchical clustering of population structure.
+#' Function to perform bootstrap replicated of fastbaps.
 #'
 #'
 #' @import Matrix

@@ -22,7 +22,7 @@ multi_level_best_baps_partition(sparse.data, h, levels = 2,
 a data.frame representing the final clustering at multiple resolutions
 }
 \description{
-Function to perform traditional hierarchical clustering, choosing the best partition at each level using the fastbaps approach.
+Function to partition a given phylogeny, choosing the best partition at each level using the fastbaps approach.
 }
 \examples{
 

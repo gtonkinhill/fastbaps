@@ -24,7 +24,7 @@ boot_fast_baps(sparse.data, k.init = NULL, n.replicates = 100,
 a co-occurence count matrix
 }
 \description{
-Function to perform Bayesian hierarchical clustering of population structure.
+Function to perform bootstrap replicated of fastbaps.
 }
 \examples{
 
