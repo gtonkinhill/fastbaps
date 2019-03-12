@@ -23,6 +23,7 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
   # Check inputs
   if(class(fasta)!="DNAbin") {
     if(!file.exists(fasta)) stop(paste("Can't locate file", fasta))
+    fasta <- normalizePath(fasta)
     if(!is.logical(check.fasta)) stop("check.fasta should be one of TRUE/FALSE!")
     if(check.fasta){
       # Cheat a bit by checking the file using ape
