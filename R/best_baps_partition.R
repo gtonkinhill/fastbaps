@@ -53,7 +53,7 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
   if(!quiet){
     print("Calculating node marginal llks...")
   }
-  llks <- tree_llk(sparse.data, h$merge)
+  llks <- fastbaps:::tree_llk(sparse.data, h$merge)
   n.isolates <- ncol(sparse.data$snp.matrix)
 
   if(!quiet){
@@ -63,7 +63,7 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
   threshold <- log(0.5)
   rk <- llks$rk[(n.isolates+1):length(llks$rk)]
 
-  clusters <- summarise_clusters(h$merge, rk, threshold, n.isolates)
+  clusters <- fastbaps:::summarise_clusters(h$merge, rk, threshold, n.isolates)
   clusters <- as.numeric(factor(clusters))
   names(clusters) <- h$labels
 

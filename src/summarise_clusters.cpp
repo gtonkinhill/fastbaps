@@ -54,8 +54,8 @@ IntegerVector summarise_clusters(NumericMatrix merge, NumericVector rk, double t
   IntegerVector final_clust(n_isolates, 0);
   int n_clust=0;
   for (i=0; i<clusters.size(); i++){
+    n_clust+=1;
     if (keep(i)==0){
-      n_clust+=1;
       for (j=0; j<clusters[i].size(); j++){
         final_clust(clusters[i][j]-1) = i+1;
       }
