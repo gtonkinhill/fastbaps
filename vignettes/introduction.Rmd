@@ -8,7 +8,7 @@ output:
     fig_width: 12
     fig_height: 8
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Introduction to fastbaps}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::knitr}
 editor_options: 

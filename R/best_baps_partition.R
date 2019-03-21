@@ -36,6 +36,12 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
 
   if(class(h)=="phylo"){
     if(!ape::is.rooted(h)) stop("phylo object must be rooted")
+
+    if (any(h$edge.length<0)) {
+      warning("some edge lengths < 0! These will be converted to 1e-6")
+      h$edge.length[h$edge.length<0] <- 1e-6
+    }
+
     h <- ape::multi2di(h)
     nh <- phytools::nodeHeights(h)
     tip.edges <- h$edge[,2]<=length(h$tip.label)
@@ -53,7 +59,7 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
   if(!quiet){
     print("Calculating node marginal llks...")
   }
-  llks <- fastbaps:::tree_llk(sparse.data, h$merge)
+  llks <- tree_llk(sparse.data, h$merge)
   n.isolates <- ncol(sparse.data$snp.matrix)
 
   if(!quiet){
@@ -63,7 +69,7 @@ best_baps_partition <- function(sparse.data, h, quiet=FALSE){
   threshold <- log(0.5)
   rk <- llks$rk[(n.isolates+1):length(llks$rk)]
 
-  clusters <- fastbaps:::summarise_clusters(h$merge, rk, threshold, n.isolates)
+  clusters <- summarise_clusters(h$merge, rk, threshold, n.isolates)
   clusters <- as.numeric(factor(clusters))
   names(clusters) <- h$labels
 
