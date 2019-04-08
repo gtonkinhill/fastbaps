@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fcntl.h>
 #include <stdio.h>
+#include <zlib.h>
+KSEQ_INIT(gzFile, gzread)
 
 using namespace Rcpp;
 
@@ -13,30 +15,32 @@ List import_fasta_to_vector_each_nt(std::string file) {
   //Initially run through fasta to get consensus sequence and dimensions of matrix
   int n = 0;
   int l = 0;
-  kseq seq;
+
+  gzFile fp;
+  kseq_t *seq;
+
   const char * f = file.c_str();
+  fp = gzopen(f, "r");
 
-  int fp = open(f, O_RDONLY);
-  FunctorRead r;
-  kstream<int, FunctorRead> ks(fp, r);
+  seq = kseq_init(fp);
 
-  l = ks.read(seq);
-  int seq_length = seq.seq.length();
+  l = kseq_read(seq);
+  int seq_length = strlen(seq->seq.s);
   int allele_counts[5][seq_length];
   memset(allele_counts, 0, 5*seq_length*sizeof(int));
 
 
-  while((l = ks.read(seq)) >= 0) {
+  while((l = kseq_read(seq)) >= 0) {
     // std::cout << seq.name << std::endl;
     // std::cout << seq.seq << std::endl;
     for(int j=0; j<seq_length; j++){
-      if((seq.seq[j]=='a') || (seq.seq[j]=='A')){
+      if((seq->seq.s[j]=='a') || (seq->seq.s[j]=='A')){
         allele_counts[0][j] += 1;
-      } else if((seq.seq[j]=='c') || (seq.seq[j]=='C')){
+      } else if((seq->seq.s[j]=='c') || (seq->seq.s[j]=='C')){
         allele_counts[1][j] += 1;
-      } else if((seq.seq[j]=='g') || (seq.seq[j]=='G')){
+      } else if((seq->seq.s[j]=='g') || (seq->seq.s[j]=='G')){
         allele_counts[2][j] += 1;
-      } else if((seq.seq[j]=='t') || (seq.seq[j]=='T')){
+      } else if((seq->seq.s[j]=='t') || (seq->seq.s[j]=='T')){
         allele_counts[3][j] += 1;
       } else {
         allele_counts[4][j] += 1;
@@ -44,7 +48,8 @@ List import_fasta_to_vector_each_nt(std::string file) {
     }
     n++;
   }
-  close(fp);
+  kseq_destroy(seq);
+  gzclose(fp);
 
   // Now calculate the consensus sequence
   NumericVector consensus(seq_length);
@@ -71,14 +76,15 @@ List import_fasta_to_vector_each_nt(std::string file) {
   m_x.reserve(2*10000);
 
   // open a new stream to the fasta file TODO: I think there's a cleaner way of doing this.
-  int fp2 = open(f, O_RDONLY);
-  kstream<int, FunctorRead> ks2(fp2, r);
+  fp = gzopen(f, "r");
+  seq = kseq_init(fp);
+
   char temp_char;
   int n_snps = 0;
   n=1;
-  while((l = ks2.read(seq)) >= 0) {
+  while((l = kseq_read(seq)) >= 0) {
     // Record sequence names
-    seq_names[n-1] = seq.name;
+    seq_names[n-1] = seq->name.s;
 
     if ((m_i.capacity() - 2*n_snps)<100){
       // Reserve memory
@@ -87,7 +93,7 @@ List import_fasta_to_vector_each_nt(std::string file) {
       m_x.reserve( 2*m_x.capacity() );
     }
     for(int j=0; j<seq_length; j++){
-      temp_char = seq.seq[j];
+      temp_char = seq->seq.s[j];
       if((((temp_char=='A') || (temp_char=='a')) && (consensus[j]!=0)) && (consensus[j]!=4) && (allele_counts[0][j]>1)){
         m_i.push_back(n);
         m_j.push_back(j+1);
@@ -112,7 +118,8 @@ List import_fasta_to_vector_each_nt(std::string file) {
     }
     n += 1;
   }
-  close(fp2);
+  kseq_destroy(seq); // STEP 5: destroy seq
+  gzclose(fp);
 
   return List::create(Named("i") = wrap(m_i),
                       Named("j") = wrap(m_j),

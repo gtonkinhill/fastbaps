@@ -2,13 +2,14 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::plugins(openmp)]]
+
 
 #ifdef _OPENMP
   #include <omp.h>
   void omp_set_num_threads(int num_threads);
   int omp_get_num_threads();
 #endif
-// [[Rcpp::plugins(openmp)]]
 
 using namespace Rcpp;
 using namespace std;
