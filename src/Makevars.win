@@ -1,1 +1,2 @@
-PKG_CXXFLAGS=-DARMA_64BIT_WORD -lz
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` -lz
+PKG_CXXFLAGS=-DARMA_64BIT_WORD

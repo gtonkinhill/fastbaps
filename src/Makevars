@@ -2,9 +2,11 @@ CXX_STD=CXX11
 
 CXX1X=$(shell ${R_HOME}/bin/R CMD config CXX11)
 
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` -lz
+
 ifeq ($(shell $(CXX1X) -fopenmp -E -xc++ - 2>&1 >/dev/null && echo 'true'), true)
   PKG_CFLAGS=$(SHLIB_OPENMP_CFLAGS)
-  PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS) -DARMA_64BIT_WORD -lz
+  PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS) -DARMA_64BIT_WORD
 else
-  PKG_CXXFLAGS=-DARMA_64BIT_WORD -lz
+  PKG_CXXFLAGS=-DARMA_64BIT_WORD
 endif
