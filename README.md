@@ -217,7 +217,7 @@ dendro <- as.dendrogram(fast_baps(sparse.data))
 #> [1] "Calculating initial clustering..."
 #> [1] "Calculating initial dk values..."
 #> [1] "Clustering using hierarchical Bayesian clustering..."
-heatmap(boot.result, dendro, dendro)
+gplots::heatmap.2(boot.result, dendro, dendro, tracecol = NA)
 ```
 
 ![](inst/vignette-supp/unnamed-chunk-17-1.png)
