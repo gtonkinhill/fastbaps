@@ -25,7 +25,9 @@ devtools::install_github("gtonkinhill/fastbaps", build_vignettes = TRUE)
 Quick Start
 -----------
 
-Run fastbaps
+Run fastbaps.
+
+**NOTE:** You need to replace the variable `fasta.file.name` with the path to your fasta file. The system.file function is only used in this example vignette.
 
 ``` r
 # devtools::install_github('gtonkinhill/fastbaps')
