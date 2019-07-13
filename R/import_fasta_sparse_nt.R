@@ -35,7 +35,14 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
 
   if(class(fasta)=="DNAbin"){
     fasta <- as.character(as.matrix(fasta))
-    ij <- which(t(fasta) != fasta[1,], arr.ind = TRUE)
+    seqnames <- rownames(fasta)
+
+    cons_ref <-  c(a=0,c=1,g=2,t=3,`-`=5,`n`=5)
+    cosensus <- apply(fasta[2:nrow(fasta),,drop=FALSE], 2, function(x){
+      tbl <- table(x)
+      cons_ref[names(tbl)[which.max(tbl)]]
+    })
+
     fasta[fasta=='a'] <- 1
     fasta[fasta=='c'] <- 2
     fasta[fasta=='g'] <- 3
@@ -43,14 +50,16 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
     fasta[fasta=='-'] <- 5
     fasta[fasta=='n'] <- 5
     fasta <- apply(fasta, 2, as.numeric)
+
+    ij <- which(t(fasta) != (cosensus+1), arr.ind = TRUE)
     snp.data <- list(num.seqs=nrow(fasta),
-                     consensus=fasta[1,]-1,
+                     consensus=cosensus,
                      seq.length=ncol(fasta),
                      seq.names=rownames(fasta))
 
     snp.matrix <- t(sparseMatrix(i=ij[,1], j=ij[,2], x=t(fasta)[ij],
                                  dims = c(snp.data$seq.length, snp.data$num.seqs),
-                                 dimnames = list(1:snp.data$seq.length, snp.data$seq.names)))
+                                 dimnames = list(1:snp.data$seq.length, seqnames)))
 
   } else {
     snp.data <- import_fasta_to_vector_each_nt(fasta)

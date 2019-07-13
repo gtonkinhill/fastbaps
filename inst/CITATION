@@ -1,0 +1,17 @@
+citHeader("The best way to cite fastbaps in publications is to use:")
+
+citEntry(entry = "Article",
+title        = "Fast hierarchical Bayesian analysis of population structure",
+author       = personList(as.person("Gerry Tonkin-Hill"),
+                 as.person("John A Lees"),
+                 as.person("Stephen D Bentley"),
+                 as.person("Simon D W Frost"),
+                 as.person("Jukka Corander")),
+journal      = "Nucleic Acids Res..",
+year         = "2019",
+pages        = "1362--4962",
+url          = "http://dx.doi.org/10.1093/nar/gkz361",
+
+textVersion  = "Tonkin-Hill,G., Lees,J.A., Bentley,S.D., Frost,S.D.W. and Corander,J. (2019) Fast hierarchical Bayesian analysis of population structure. Nucleic Acids Res., 10.1093/nar/gkz361."
+
+
