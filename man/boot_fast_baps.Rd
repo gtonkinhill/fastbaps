@@ -28,11 +28,12 @@ Function to perform bootstrap replicated of fastbaps.
 }
 \examples{
 
+\dontrun{
 fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 boot.result <- boot_fast_baps(sparse.data)
 dendro <- as.dendrogram(fast_baps(sparse.data))
 heatmap(boot.result, dendro, dendro)
-
+}
 
 }

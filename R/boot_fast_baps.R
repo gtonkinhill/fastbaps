@@ -16,12 +16,13 @@
 #'
 #' @examples
 #'
+#' \dontrun{
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' boot.result <- boot_fast_baps(sparse.data)
 #' dendro <- as.dendrogram(fast_baps(sparse.data))
 #' heatmap(boot.result, dendro, dendro)
-#'
+#' }
 #'
 #' @export
 boot_fast_baps <- function(sparse.data, k.init=NULL, n.replicates=100, hc.method='ward',

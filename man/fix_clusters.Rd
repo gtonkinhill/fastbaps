@@ -23,6 +23,7 @@ Function to iteratively update an intially clustering, greedily maximising the B
 }
 \examples{
 
+\dontrun{
 fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 sim.matrix <- snp_similarity(sparse.data)
@@ -30,5 +31,6 @@ x <- as.dist(1-sim.matrix/max(sim.matrix))
 phylo <- ape::as.phylo(hclust(x, method="average"))
 clusters <- best_baps_partition(sparse.data, phylo)
 clusters <- fix_clusters(sparse.data, clusters)
+}
 
 }

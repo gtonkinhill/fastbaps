@@ -13,6 +13,7 @@
 #'
 #' @examples
 #'
+#' \dontrun{
 #' fasta.file.name <- system.file("extdata", "seqs.fa", package = "fastbaps")
 #' sparse.data <- import_fasta_sparse_nt(fasta.file.name)
 #' sim.matrix <- snp_similarity(sparse.data)
@@ -20,6 +21,7 @@
 #' phylo <- ape::as.phylo(hclust(x, method="average"))
 #' clusters <- best_baps_partition(sparse.data, phylo)
 #' clusters <- fix_clusters(sparse.data, clusters)
+#' }
 #'
 #' @export
 fix_clusters <- function(sparse.data, clusters, n.iterations=1, quiet=FALSE){
