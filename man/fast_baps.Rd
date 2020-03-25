@@ -4,8 +4,13 @@
 \alias{fast_baps}
 \title{fast_baps}
 \usage{
-fast_baps(sparse.data, k.init = NULL, hc.method = "ward",
-  n.cores = 1, quiet = FALSE)
+fast_baps(
+  sparse.data,
+  k.init = NULL,
+  hc.method = "ward",
+  n.cores = 1,
+  quiet = FALSE
+)
 }
 \arguments{
 \item{sparse.data}{a sparse SNP data object returned from import_fasta_sparse_nt}

@@ -4,8 +4,13 @@
 \alias{multi_level_best_baps_partition}
 \title{multi_level_best_baps_partition}
 \usage{
-multi_level_best_baps_partition(sparse.data, h, levels = 2,
-  n.cores = 1, quiet = TRUE)
+multi_level_best_baps_partition(
+  sparse.data,
+  h,
+  levels = 2,
+  n.cores = 1,
+  quiet = TRUE
+)
 }
 \arguments{
 \item{sparse.data}{a sparse SNP data object returned from import_fasta_sparse_nt}

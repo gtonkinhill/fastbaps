@@ -4,8 +4,14 @@
 \alias{multi_res_baps}
 \title{multi_res_baps}
 \usage{
-multi_res_baps(sparse.data, levels = 2, k.init = NULL,
-  hc.method = "ward", n.cores = 1, quiet = TRUE)
+multi_res_baps(
+  sparse.data,
+  levels = 2,
+  k.init = NULL,
+  hc.method = "ward",
+  n.cores = 1,
+  quiet = TRUE
+)
 }
 \arguments{
 \item{sparse.data}{a sparse SNP data object returned from import_fasta_sparse_nt}

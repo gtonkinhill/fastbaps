@@ -1,0 +1,55 @@
+#!/usr/bin/env Rscript --vanilla
+
+library(optparse)
+library(fastbaps)
+library(ape)
+
+option_list = list(
+  make_option(c("-i", "--input"), type="character",
+              help="input fasta file name"),
+  make_option(c("-o", "--out"), type="character", default="fastbaps_clusters.csv",
+              help="output file name [default= fastbaps_clusters.csv]"),
+  make_option(c("-p", "--prior"), type="character", default="symmetric",
+              help="which prior to use. From most conservative to least: 'symmetric', 'baps', 'optimise.symmetric' or 'optimise.baps' [default='symmetric']",
+              metavar="character"),
+  make_option(c("-l", "--levels"), type="integer", default=2,
+              help="the number of levels to recursively perform fastbaps clustering on"),
+  make_option(c("--phylogney"), type="character", default = NULL,
+              help="optionaly you can condition on a pre-computed phylogeny. This will generate a partition of the phylogeny using the fastbaps algorithm.",
+              metavar="character"),
+  make_option(c("-t", "--threads"), type="integer", default=2,
+              help="the number threads to use when running fastbaps.")
+)
+
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
+
+# check inputs
+if (is.null(opt$input)){
+  print_help(opt_parser)
+  stop("A fasta file must be supplied (input file)", call.=FALSE)
+}
+if (!(opt$prior %in% c('symmetric', 'baps', 'optimise.symmetric', 'optimise.baps'))){
+  print_help(opt_parser)
+  stop("prior must be one of: 'symmetric', 'baps', 'optimise.symmetric' or 'optimise.baps'", call.=FALSE)
+}
+if (!is.integer(opt$levels) || opt$levels<1){
+  print_help(opt_parser)
+  stop("levels must be a strictly positive integer.", call.=FALSE)
+}
+
+# load FASTA
+sparse.data <- fastbaps::import_fasta_sparse_nt(opt$input)
+
+# run fastbaps
+sparse.data <- fastbaps::optimise_prior(sparse.data, type = opt$prior)
+
+if(is.null(opt$phylogeny)){
+  multi <- fastbaps::multi_res_baps(sparse.data, levels = opt$levels, n.cores = opt$threads)
+} else {
+  tree <- ape::read.tree(opt$phylogeny)
+  multi <- fastbaps::multi_level_best_baps_partition(sparse.data, h = tree, levels = opt$levels, n.cores = opt$threads)
+}
+
+# write results
+write.table(multi, file=opt$out, row.names = FALSE, col.names = TRUE, sep = ",", quote = FALSE)

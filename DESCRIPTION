@@ -27,7 +27,7 @@ Suggests: knitr,
     ggtree,
     ggplot2
 LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 VignetteBuilder: knitr
 URL: https://github.com/gtonkinhill/fastbaps
 BugReports: https://github.com/gtonkinhill/fastbaps/issues

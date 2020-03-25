@@ -4,8 +4,14 @@
 \alias{boot_fast_baps}
 \title{boot_fast_baps}
 \usage{
-boot_fast_baps(sparse.data, k.init = NULL, n.replicates = 100,
-  hc.method = "ward", n.cores = 1, quiet = TRUE)
+boot_fast_baps(
+  sparse.data,
+  k.init = NULL,
+  n.replicates = 100,
+  hc.method = "ward",
+  n.cores = 1,
+  quiet = TRUE
+)
 }
 \arguments{
 \item{sparse.data}{a sparse SNP data object returned from import_fasta_sparse_nt}

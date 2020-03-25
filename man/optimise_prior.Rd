@@ -4,8 +4,13 @@
 \alias{optimise_prior}
 \title{optimise_prior}
 \usage{
-optimise_prior(sparse.data, grid.interval = c(5e-04, 10),
-  type = "optimise.baps", hc.method = "ward", n.cores = 1)
+optimise_prior(
+  sparse.data,
+  grid.interval = c(5e-04, 10),
+  type = "optimise.baps",
+  hc.method = "ward",
+  n.cores = 1
+)
 }
 \arguments{
 \item{sparse.data}{a sparse SNP data object returned from import_fasta_sparse_nt}
