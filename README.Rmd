@@ -40,6 +40,20 @@ If you would like to also build the vignette with your installation run:
 devtools::install_github("gtonkinhill/fastbaps", build_vignettes = TRUE)
 ```
 
+### Conda
+
+`fastbaps` can also be installed using Conda
+
+```
+conda install -c conda-forge -c bioconda -c defaults r-fastbaps
+```
+
+## Choice of Prior
+
+Fastbaps includes a number of options for the Dirichlet prior hyperparamters. These range in order from most conservative to least as `symmetric`, `baps`, `optimised.symmetric` and `optimised.baps`. The choice of prior can be set using the `optimise_prior` function.
+
+It is also possible to condition on a pre-existing phylogeny, which allows a user to partition the phylogeny using the fastbaps algorithm. This is described in more detail further down in the introduction.
+
 ## Quick Start
 
 Run fastbaps.
@@ -57,6 +71,32 @@ sparse.data <- optimise_prior(sparse.data, type = "optimise.symmetric")
 baps.hc <- fast_baps(sparse.data)
 clusters <- best_baps_partition(sparse.data, as.phylo(baps.hc))
 ```
+
+All these steps can be combined and the algorithm run over multiple levels by running
+
+```{r}
+sparse.data <- optimise_prior(sparse.data, type = "optimise.symmetric")
+multi <- multi_res_baps(sparse.data)
+```
+
+## Command Line Script
+
+The fastbaps package now includes a command line script. The location of this script can be found by running 
+
+```{r, eval=FALSE}
+system.file("run_fastbaps", package = "fastbaps")
+```
+
+This script can then be copied to a location on the users path. If you have installed fastbaps using conda, this will already have been done for you.
+
+## Citation
+
+To cite fastbaps please use
+
+> Tonkin-Hill,G., Lees,J.A., Bentley,S.D., Frost,S.D.W. and Corander,J. (2019) Fast hierarchical Bayesian analysis of population structure. Nucleic Acids Res., 10.1093/nar/gkz361.
+
+
+## Introduction
 
 ```{r, echo = FALSE}
 intro_rmd <- 'vignettes/introduction.Rmd'

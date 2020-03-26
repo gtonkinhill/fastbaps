@@ -22,6 +22,19 @@ If you would like to also build the vignette with your installation run:
 devtools::install_github("gtonkinhill/fastbaps", build_vignettes = TRUE)
 ```
 
+### Conda
+
+`fastbaps` can also be installed using Conda
+
+    conda install -c conda-forge -c bioconda -c defaults r-fastbaps
+
+Choice of Prior
+---------------
+
+Fastbaps includes a number of options for the Dirichlet prior hyperparamters. These range in order from most conservative to least as `symmetric`, `baps`, `optimised.symmetric` and `optimised.baps`. The choice of prior can be set using the `optimise_prior` function.
+
+It is also possible to condition on a pre-existing phylogeny, which allows a user to partition the phylogeny using the fastbaps algorithm. This is described in more detail further down in the introduction.
+
 Quick Start
 -----------
 
@@ -46,6 +59,35 @@ clusters <- best_baps_partition(sparse.data, as.phylo(baps.hc))
 #> [1] "Calculating node marginal llks..."
 #> [1] "Finding best partition..."
 ```
+
+All these steps can be combined and the algorithm run over multiple levels by running
+
+``` r
+sparse.data <- optimise_prior(sparse.data, type = "optimise.symmetric")
+#> [1] "Optimised hyperparameter: 0.02"
+multi <- multi_res_baps(sparse.data)
+```
+
+Command Line Script
+-------------------
+
+The fastbaps package now includes a command line script. The location of this script can be found by running
+
+``` r
+system.file("run_fastbaps", package = "fastbaps")
+```
+
+This script can then be copied to a location on the users path. If you have installed fastbaps using conda, this will already have been done for you.
+
+Citation
+--------
+
+To cite fastbaps please use
+
+> Tonkin-Hill,G., Lees,J.A., Bentley,S.D., Frost,S.D.W. and Corander,J. (2019) Fast hierarchical Bayesian analysis of population structure. Nucleic Acids Res., 10.1093/nar/gkz361.
+
+Introduction
+------------
 
 The fast BAPS algorithm is based on applying the hierarchical Bayesian clustering (BHC) algorithm of (Heller and Ghahramani 2005) to the problem of clustering genetic sequences using the same likelihood as BAPS (Cheng et al. 2013). The Bayesian hierarchical clustering can be initiated with sequences as individual clusters or by running a faster conventional hierarchical clustering initially followed by BHC of the resulting clusters.
 
@@ -117,7 +159,7 @@ f2 <- facet_plot(gg, panel = "fastbaps", data = plot.df, geom = geom_tile, aes(x
 f2
 ```
 
-![](inst/vignette-supp/unnamed-chunk-12-1.png)
+![](inst/vignette-supp/unnamed-chunk-14-1.png)
 
 We can compare this result to other priors, the un-optimised symmetric or BAPS prior similar to STRUCTURE and hierBAPS, an optimised BAPS prior or the population mean based prior of Heller et al.
 
@@ -141,7 +183,7 @@ f2 <- facet_plot(gg, panel = "fastbaps", data = plot.df, geom = geom_tile, aes(x
 f2
 ```
 
-![](inst/vignette-supp/unnamed-chunk-13-1.png)
+![](inst/vignette-supp/unnamed-chunk-15-1.png)
 
 we can also use the same prior as used in the BHC algorithm of Heller et al. However this tends to overpartition population genetic data.
 
@@ -166,7 +208,7 @@ f2 <- facet_plot(gg, panel = "fastbaps", data = plot.df, geom = geom_tile, aes(x
 f2
 ```
 
-![](inst/vignette-supp/unnamed-chunk-14-1.png)
+![](inst/vignette-supp/unnamed-chunk-16-1.png)
 
 we can also investigate multiple levels
 
@@ -186,7 +228,7 @@ f2 <- facet_plot(f2, panel = "fastbaps level 2", data = plot.df, geom = geom_til
 f2
 ```
 
-![](inst/vignette-supp/unnamed-chunk-15-1.png)
+![](inst/vignette-supp/unnamed-chunk-17-1.png)
 
 We can also partition an initial hierarchy or phylogeny.
 
@@ -198,8 +240,7 @@ best.partition <- best_baps_partition(sparse.data, iqtree.rooted)
 #> [1] "Calculating node marginal llks..."
 #> [1] "Finding best partition..."
 
-plot.df <- data.frame(id = iqtree.rooted$tip.label, fastbaps = best.partition, 
-    stringsAsFactors = FALSE)
+plot.df <- data.frame(id = iqtree.rooted$tip.label, fastbaps = best.partition, stringsAsFactors = FALSE)
 
 gg <- ggtree(iqtree.rooted)
 f2 <- facet_plot(gg, panel = "fastbaps", data = plot.df, geom = geom_tile, aes(x = fastbaps), 
@@ -207,7 +248,7 @@ f2 <- facet_plot(gg, panel = "fastbaps", data = plot.df, geom = geom_tile, aes(x
 f2
 ```
 
-![](inst/vignette-supp/unnamed-chunk-16-1.png)
+![](inst/vignette-supp/unnamed-chunk-18-1.png)
 
 finally we can also look at the stability of the inferred clusters using the Bootstrap
 
@@ -222,7 +263,7 @@ dendro <- as.dendrogram(fast_baps(sparse.data))
 gplots::heatmap.2(boot.result, dendro, dendro, tracecol = NA)
 ```
 
-![](inst/vignette-supp/unnamed-chunk-17-1.png)
+![](inst/vignette-supp/unnamed-chunk-19-1.png)
 
 References
 ----------
@@ -236,5 +277,7 @@ Kalyaanamoorthy, Subha, Bui Quang Minh, Thomas K F Wong, Arndt von Haeseler, and
 Paradis, Emmanuel, Julien Claude, and Korbinian Strimmer. 2004. “APE: Analyses of Phylogenetics and Evolution in R Language.” *Bioinformatics* 20 (2): 289–90. doi:[10.1093/bioinformatics/btg412](https://doi.org/10.1093/bioinformatics/btg412).
 
 Revell, Liam J. 2012. “Phytools: An R Package for Phylogenetic Comparative Biology (and Other Things).” *Methods Ecol. Evol.* 3 (2). Blackwell Publishing Ltd: 217–23. doi:[10.1111/j.2041-210X.2011.00169.x](https://doi.org/10.1111/j.2041-210X.2011.00169.x).
+
+Tonkin-Hill, Gerry, John A Lees, Stephen D Bentley, Simon D W Frost, and Jukka Corander. 2019. “Fast Hierarchical Bayesian Analysis of Population Structure.” *Nucleic Acids Res.*, May. doi:[10.1093/nar/gkz361](https://doi.org/10.1093/nar/gkz361).
 
 Yu, Guangchuang, David K Smith, Huachen Zhu, Yi Guan, and Tommy Tsan-Yuk Lam. 2017. “Ggtree: An R Package for Visualization and Annotation of Phylogenetic Trees with Their Covariates and Other Associated Data.” *Methods Ecol. Evol.* 8 (1): 28–36. doi:[10.1111/2041-210X.12628](https://doi.org/10.1111/2041-210X.12628).
