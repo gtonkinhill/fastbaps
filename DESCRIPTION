@@ -1,6 +1,6 @@
 Package: fastbaps
 Title: A fast genetic clustering algorithm that approximates a Dirichlet Process Mixture model
-Version: 1.0.0
+Version: 1.0.4
 Authors@R: person("Gerry", "Tonkin-Hill", email = "g.tonkinhill@gmail.com", role = c("aut", "cre"))
 Description: Takes a multiple sequence alignment as input and clusters according to the 'no-admixture' model. 
   It combines ideas from the Bayesian Hierarchical Clustering algorithm of Heller et al. <doi:10.1145/1102351.1102389>
@@ -21,7 +21,8 @@ Imports:
     parallel,
     genie,
     fastcluster,
-    gplots
+    gplots,
+    optparse
 Suggests: knitr,
     rmarkdown,
     ggtree,

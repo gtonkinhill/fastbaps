@@ -14,7 +14,7 @@ option_list = list(
               metavar="character"),
   make_option(c("-l", "--levels"), type="integer", default=2,
               help="the number of levels to recursively perform fastbaps clustering on"),
-  make_option(c("--phylogney"), type="character", default = NULL,
+  make_option(c("--phylogeny"), type="character", default = NULL,
               help="optionaly you can condition on a pre-computed phylogeny. This will generate a partition of the phylogeny using the fastbaps algorithm.",
               metavar="character"),
   make_option(c("-t", "--threads"), type="integer", default=2,
