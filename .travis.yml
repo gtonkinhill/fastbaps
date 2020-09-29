@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 language: r
 r: bioc-release
 
