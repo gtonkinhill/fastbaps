@@ -29,9 +29,9 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
   NumericVector consensus = data[1];
   NumericMatrix prior = data[2];
 
-  const unsigned int n_partitions = partitions.size();
-  const unsigned int n_isolates = snp_matrix.n_cols;
-  const int n_snps = snp_matrix.n_rows;
+  unsigned int n_partitions = partitions.size();
+  unsigned int n_isolates = snp_matrix.n_cols;
+  int n_snps = snp_matrix.n_rows;
   unsigned int i,j,p,p1,p2;
   arma::dmat rk = arma::zeros<arma::dmat>(n_partitions, n_partitions);
   arma::dmat mllk = arma::zeros<arma::dmat>(n_partitions, n_partitions);
