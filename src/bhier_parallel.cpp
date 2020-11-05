@@ -104,7 +104,7 @@ List bhier_parallel(List data, List partitions, NumericVector d_k, int n_cores) 
 
 
   // Calculate the llk of each partition
-#pragma omp parallel shared(term1, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index, p_tree, partition_sizes) default(none)
+#pragma omp parallel shared(n_snps, n_partitions, term1, sp_partition_counts, initial_partition_llk, pre_lgamma, prior_index, p_tree, partition_sizes) default(none)
 {
   unsigned int pp, k, partition_length_temp;
   int consensus_counts_temp[n_snps];
