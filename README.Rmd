@@ -18,8 +18,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-[![Travis-CI Build Status](https://travis-ci.com/gtonkinhill/fastbaps.svg?branch=master)](https://travis-ci.com/gtonkinhill/fastbaps)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/gtonkinhill/fastbaps/workflows/R-CMD-check/badge.svg)](https://github.com/gtonkinhill/fastbaps/actions)
 [![DOI](https://zenodo.org/badge/137083307.svg)](https://zenodo.org/badge/latestdoi/137083307)
+<!-- badges: end -->
 
 
 # fastbaps
