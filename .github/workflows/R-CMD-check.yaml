@@ -10,7 +10,7 @@ on:
       - main
       - master
   schedule:
-    - cron:  '* * 1 * *'
+    - cron:  '1 1 1 * *'
 
 name: R-CMD-check
 
