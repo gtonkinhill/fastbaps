@@ -71,6 +71,7 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
           remotes::install_cran("formatR")
+          remotes::install_cran("rmarkdown")
           remotes::install_bioc("ggtree")
         shell: Rscript {0}
 
