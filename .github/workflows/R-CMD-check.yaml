@@ -10,7 +10,7 @@ on:
       - main
       - master
   schedule:
-    - cron:  '* * 1 * *'
+    - cron:  '1 1 1 * *'
 
 name: R-CMD-check
 
@@ -71,6 +71,7 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
           remotes::install_cran("formatR")
+          remotes::install_cran("rmarkdown")
           remotes::install_bioc("ggtree")
         shell: Rscript {0}
 

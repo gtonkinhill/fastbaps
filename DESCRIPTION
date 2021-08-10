@@ -25,6 +25,7 @@ Imports:
     optparse
 Suggests: knitr,
     rmarkdown,
+    markdown,
     ggtree,
     ggplot2
 LinkingTo: Rcpp, RcppArmadillo
