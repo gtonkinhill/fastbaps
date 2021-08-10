@@ -26,13 +26,12 @@ List import_fasta_to_vector_each_nt(std::string file) {
 
   l = kseq_read(seq);
   int seq_length = strlen(seq->seq.s);
-  int allele_counts[5][seq_length];
-  memset(allele_counts, 0, 5*seq_length*sizeof(int));
 
+  std::vector<std::vector<int> > allele_counts(
+      5,
+      std::vector<int>(seq_length, 0));
 
   while((l = kseq_read(seq)) >= 0) {
-    // std::cout << seq.name << std::endl;
-    // std::cout << seq.seq << std::endl;
     for(int j=0; j<seq_length; j++){
       if((seq->seq.s[j]=='a') || (seq->seq.s[j]=='A')){
         allele_counts[0][j] += 1;

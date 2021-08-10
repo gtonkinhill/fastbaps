@@ -37,7 +37,7 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
     fasta <- as.character(as.matrix(fasta))
     seqnames <- rownames(fasta)
 
-    cons_ref <-  c(a=0,c=1,g=2,t=3,`-`=5,`n`=5)
+    cons_ref <-  c(a=0,c=1,g=2,t=3,`-`=4,`n`=4)
     cosensus <- apply(fasta[2:nrow(fasta),,drop=FALSE], 2, function(x){
       tbl <- table(x)
       cons_ref[names(tbl)[which.max(tbl)]]
