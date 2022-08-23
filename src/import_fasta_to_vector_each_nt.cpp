@@ -24,14 +24,19 @@ List import_fasta_to_vector_each_nt(std::string file) {
 
   seq = kseq_init(fp);
 
-  l = kseq_read(seq);
-  int seq_length = strlen(seq->seq.s);
-
-  std::vector<std::vector<int> > allele_counts(
-      5,
-      std::vector<int>(seq_length, 0));
+  int seq_length = -1;
+  std::vector<std::vector<int> > allele_counts;
 
   while((l = kseq_read(seq)) >= 0) {
+
+    if (seq_length==-1){
+      // initialise
+      seq_length = strlen(seq->seq.s);
+      allele_counts = std::vector<std::vector<int> >(
+          5,
+          std::vector<int>(seq_length, 0));
+    }
+
     for(int j=0; j<seq_length; j++){
       if((seq->seq.s[j]=='a') || (seq->seq.s[j]=='A')){
         allele_counts[0][j] += 1;
@@ -52,7 +57,7 @@ List import_fasta_to_vector_each_nt(std::string file) {
 
   // Now calculate the consensus sequence
   NumericVector consensus(seq_length);
-  Rcpp::StringVector seq_names(n+1);
+  Rcpp::StringVector seq_names(n);
 
   int max_allele = -1;
 

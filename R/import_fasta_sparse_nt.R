@@ -72,18 +72,19 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
                                dimnames = list(snp.data$seq.names, 1:snp.data$seq.length))
   }
 
-  #Remove columns where the consensus is gapped
+  #Remove columns where the consensus is gaps
   snp.matrix <- snp.matrix[, snp.data$consensus!=4]
   snp.data$consensus <- snp.data$consensus[snp.data$consensus!=4]
 
 
   #remove conserved columns
   conserved <- colSums(snp.matrix>0) == 0
+  if (sum(!conserved)<2) stop("At least two variants common to more than one genome are required!")
   snp.matrix <- snp.matrix[,!conserved]
   snp.data$consensus <- snp.data$consensus[!conserved]
 
 
-  #prior matrix (number of unique allels at each locus/denominator)
+  #prior matrix (number of unique alleles at each locus/denominator)
   prior.matrix <- matrix(c(rep(nrow(snp.matrix), ncol(snp.matrix)),
                     colSums(snp.matrix==1),
                     colSums(snp.matrix==2),

@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // bhier
 List bhier(List data, List partitions, NumericVector d_k);
 RcppExport SEXP _fastbaps_bhier(SEXP dataSEXP, SEXP partitionsSEXP, SEXP d_kSEXP) {
