@@ -14,14 +14,17 @@ import_fasta_sparse_nt(fasta, prior = "baps", check.fasta = TRUE)
 \item{check.fasta}{whether to check the fasta file for issue. Slows things down a little but may be avoided for very large fasta files.}
 }
 \value{
-A sparse matrix reprsentation of the SNPs (different to the consensus sequence)
+A sparse matrix representation of the SNPs (different to the consensus sequence)
 }
 \description{
 Imports a fasta file to a sparse matrix representing SNPs from the consensus
 }
 \examples{
 fasta <- system.file("extdata", "seqs.fa", package = "fastbaps")
-fasta <- ape::read.FASTA(fasta)
 sparse.data <- import_fasta_sparse_nt(fasta)
+
+fasta <- ape::read.FASTA(fasta)
+sparse.data.ape <- import_fasta_sparse_nt(fasta)
+
 
 }

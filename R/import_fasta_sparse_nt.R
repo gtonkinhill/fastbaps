@@ -10,12 +10,15 @@
 #' @param prior the type of prior to use. Can be one of 'baps' and 'mean' (default=baps)
 #' @param check.fasta whether to check the fasta file for issue. Slows things down a little but may be avoided for very large fasta files.
 #'
-#' @return A sparse matrix reprsentation of the SNPs (different to the consensus sequence)
+#' @return A sparse matrix representation of the SNPs (different to the consensus sequence)
 #'
 #' @examples
 #' fasta <- system.file("extdata", "seqs.fa", package = "fastbaps")
-#' fasta <- ape::read.FASTA(fasta)
 #' sparse.data <- import_fasta_sparse_nt(fasta)
+#'
+#' fasta <- ape::read.FASTA(fasta)
+#' sparse.data.ape <- import_fasta_sparse_nt(fasta)
+#'
 #'
 #' @export
 import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
@@ -38,10 +41,10 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
     seqnames <- rownames(fasta)
 
     cons_ref <-  c(a=0,c=1,g=2,t=3,`-`=4,`n`=4)
-    cosensus <- apply(fasta[2:nrow(fasta),,drop=FALSE], 2, function(x){
-      tbl <- table(x)
-      cons_ref[names(tbl)[which.max(tbl)]]
-    })
+    allele_counts <- apply(fasta, 2, function(x){
+      c(table(factor(x, levels = c('a','c','g','t','-','n'))))
+    }, simplify = TRUE)
+    cosensus <- cons_ref[apply(allele_counts, 2, which.max)]
 
     fasta[fasta=='a'] <- 1
     fasta[fasta=='c'] <- 2
@@ -51,7 +54,10 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
     fasta[fasta=='n'] <- 5
     fasta <- apply(fasta, 2, as.numeric)
 
-    ij <- which(t(fasta) != (cosensus+1), arr.ind = TRUE)
+    ij <- which((t(fasta) != (cosensus+1)) & (t(fasta)!=5), arr.ind = TRUE)
+    # remove singletons
+    ij <- ij[allele_counts[cbind(t(fasta)[ij], ij[,1])] > 1, , drop=FALSE]
+
     snp.data <- list(num.seqs=nrow(fasta),
                      consensus=cosensus,
                      seq.length=ncol(fasta),
@@ -60,6 +66,7 @@ import_fasta_sparse_nt <- function(fasta, prior='baps', check.fasta=TRUE){
     snp.matrix <- t(sparseMatrix(i=ij[,1], j=ij[,2], x=t(fasta)[ij],
                                  dims = c(snp.data$seq.length, snp.data$num.seqs),
                                  dimnames = list(1:snp.data$seq.length, seqnames)))
+
 
   } else {
     snp.data <- import_fasta_to_vector_each_nt(fasta)
