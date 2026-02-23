@@ -26,6 +26,7 @@ Imports:
 Suggests: knitr,
     rmarkdown,
     markdown,
+    rbibutils,
     ggtree,
     ggplot2
 LinkingTo: Rcpp, RcppArmadillo
